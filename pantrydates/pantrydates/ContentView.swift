@@ -10,6 +10,12 @@ struct ContentView: View {
   @State private var showingAddSheet = false
   @State private var showFlaggedOnly = false
 
+  private let dateFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateStyle = .short
+    return formatter
+  }()
+
   private var displayedItems: [PantryItem] {
     showFlaggedOnly ? items.filter { $0.flagged } : items
   }
@@ -36,14 +42,14 @@ struct ContentView: View {
               HStack(spacing: 4) {
                 Image(systemName: "calendar")
                   .font(.caption2)
-                Text(item.expirationDate, style: .date)
+                Text(dateFormatter.string(from: item.expirationDate))
               }
               .foregroundStyle(.secondary)
               if let notificationDate = item.notificationDate {
                 HStack(spacing: 4) {
                   Image(systemName: "bell")
                     .font(.caption2)
-                  Text(notificationDate, style: .date)
+                  Text(dateFormatter.string(from: notificationDate))
                 }
                 .foregroundStyle(.blue)
                 .font(.caption)

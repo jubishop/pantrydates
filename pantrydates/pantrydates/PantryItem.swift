@@ -9,4 +9,5 @@ struct PantryItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePers
     var id: Int64?
     var name: String
     var expirationDate: Date
+    var flagged: Bool = false
 }

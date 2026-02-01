@@ -14,11 +14,23 @@ struct ContentView: View {
                 ForEach(items) { item in
                     NavigationLink(value: item) {
                         HStack {
+                            if item.flagged {
+                                Image(systemName: "flag.fill")
+                                    .foregroundStyle(.orange)
+                            }
                             Text(item.name)
                             Spacer()
                             Text(item.expirationDate, style: .date)
                                 .foregroundStyle(.secondary)
                         }
+                    }
+                    .swipeActions(edge: .leading) {
+                        Button {
+                            toggleFlagged(item: item)
+                        } label: {
+                            Image(systemName: item.flagged ? "flag.slash" : "flag")
+                        }
+                        .tint(.orange)
                     }
                 }
                 .onDelete(perform: deleteItems)
@@ -81,5 +93,15 @@ struct ContentView: View {
             }
         }
         loadItems()
+    }
+
+    private func toggleFlagged(item: PantryItem) {
+        guard let id = item.id else { return }
+        do {
+            try database.toggleFlagged(id: id)
+            loadItems()
+        } catch {
+            print("Failed to toggle flagged: \(error)")
+        }
     }
 }

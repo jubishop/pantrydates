@@ -26,6 +26,12 @@ struct AppDatabase {
             }
         }
 
+        migrator.registerMigration("v2") { db in
+            try db.alter(table: "pantryItem") { t in
+                t.add(column: "flagged", .boolean).notNull().defaults(to: false)
+            }
+        }
+
         return migrator
     }
 }
@@ -83,6 +89,15 @@ extension AppDatabase {
     func deleteItem(id: Int64) throws {
         try writer.write { db in
             _ = try PantryItem.deleteOne(db, key: id)
+        }
+    }
+
+    func toggleFlagged(id: Int64) throws {
+        try writer.write { db in
+            if var item = try PantryItem.fetchOne(db, key: id) {
+                item.flagged.toggle()
+                try item.update(db)
+            }
         }
     }
 }

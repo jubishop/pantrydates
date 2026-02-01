@@ -11,6 +11,7 @@ struct ItemDetailView: View {
 
     @State private var name: String = ""
     @State private var expirationDate: Date = Date()
+    @State private var flagged: Bool = false
     @State private var showDeleteConfirmation = false
     @State private var itemExists = true
 
@@ -20,6 +21,7 @@ struct ItemDetailView: View {
                 Form {
                     TextField("Item Name", text: $name)
                     DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
+                    Toggle("Flagged", isOn: $flagged)
                 }
             } else {
                 ContentUnavailableView("Item Not Found", systemImage: "questionmark.circle")
@@ -60,6 +62,7 @@ struct ItemDetailView: View {
             if let item = try database.fetchItem(id: itemId) {
                 name = item.name
                 expirationDate = item.expirationDate
+                flagged = item.flagged
             } else {
                 itemExists = false
             }
@@ -73,7 +76,7 @@ struct ItemDetailView: View {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty, itemExists else { return }
 
-        var updatedItem = PantryItem(id: itemId, name: trimmedName, expirationDate: expirationDate)
+        var updatedItem = PantryItem(id: itemId, name: trimmedName, expirationDate: expirationDate, flagged: flagged)
         do {
             try database.saveItem(&updatedItem)
         } catch {

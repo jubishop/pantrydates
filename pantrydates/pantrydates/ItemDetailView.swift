@@ -13,6 +13,7 @@ struct ItemDetailView: View {
     @State private var expirationDate: Date = Date()
     @State private var flagged: Bool = false
     @State private var notificationDate: Date? = nil
+    @State private var originalNotificationDate: Date? = nil
     @State private var showDeleteConfirmation = false
     @State private var itemExists = true
 
@@ -83,6 +84,7 @@ struct ItemDetailView: View {
                 expirationDate = item.expirationDate
                 flagged = item.flagged
                 notificationDate = item.notificationDate
+                originalNotificationDate = item.notificationDate
             } else {
                 itemExists = false
             }
@@ -96,7 +98,30 @@ struct ItemDetailView: View {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty, itemExists else { return }
 
-        var updatedItem = PantryItem(id: itemId, name: trimmedName, expirationDate: expirationDate, flagged: flagged, notificationDate: notificationDate)
+        // Reset notificationSent if the notification date changed
+        let notificationDateChanged = notificationDate != originalNotificationDate
+        let notificationSent = notificationDateChanged ? false : nil // nil means keep existing value
+
+        var updatedItem = PantryItem(
+            id: itemId,
+            name: trimmedName,
+            expirationDate: expirationDate,
+            flagged: flagged,
+            notificationDate: notificationDate,
+            notificationSent: notificationSent ?? false
+        )
+
+        // If date didn't change, we need to preserve the existing notificationSent value
+        if !notificationDateChanged {
+            do {
+                if let existingItem = try database.fetchItem(id: itemId) {
+                    updatedItem.notificationSent = existingItem.notificationSent
+                }
+            } catch {
+                print("Failed to fetch existing item: \(error)")
+            }
+        }
+
         do {
             try database.saveItem(&updatedItem)
         } catch {

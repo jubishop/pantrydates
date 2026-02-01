@@ -4,6 +4,8 @@ import SwiftUI
 
 @main
 struct pantrydatesApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+
     let database: AppDatabase
 
     init() {
@@ -12,11 +14,19 @@ struct pantrydatesApp: App {
         } catch {
             fatalError("Failed to initialize database: \(error)")
         }
+
+        NotificationManager.registerBackgroundTask()
+        NotificationManager.requestAuthorization()
     }
 
     var body: some Scene {
         WindowGroup {
             ContentView(database: database)
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .background {
+                NotificationManager.scheduleBackgroundTask()
+            }
         }
     }
 }

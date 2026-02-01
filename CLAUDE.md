@@ -16,6 +16,7 @@ SwiftUI iOS app using GRDB.swift for SQLite persistence.
 - `ContentView.swift` - Main list view with filtering and swipe actions
 - `ItemDetailView.swift` - Edit view for individual items
 - `AddItemView.swift` - Sheet for creating new items
+- `NotificationManager.swift` - Background task scheduling and local notification delivery
 
 **Data flow:**
 - `pantrydatesApp` creates `AppDatabase` and passes it to views
@@ -31,3 +32,24 @@ Migrations are in `Database.swift` under the `migrator` property. Add new migrat
 1. Add property to `PantryItem` struct with a default value
 2. Add migration in `Database.swift` to alter the table
 3. Update views to display/edit the new field
+
+## Notification System
+
+Each pantry item can have an optional `notificationDate` for reminders. The system uses iOS Background Tasks to check and deliver notifications.
+
+**How it works:**
+- `notificationDate` (optional) - When set, triggers a local notification on or after this date
+- `notificationSent` (boolean) - Tracks whether the notification has been delivered to prevent duplicates
+- Changing `notificationDate` in `ItemDetailView` automatically resets `notificationSent` to false
+
+**Background task flow:**
+1. `NotificationManager.registerBackgroundTask()` registers the task identifier on app init
+2. `NotificationManager.scheduleBackgroundTask()` schedules the next check when app enters background (minimum 12-hour interval)
+3. When the task runs, `processNotifications()` queries for items where `notificationDate <= now` and `notificationSent == false`
+4. For each match, it sends a local notification and marks `notificationSent = true`
+
+**Required Info.plist keys:**
+- `BGTaskSchedulerPermittedIdentifiers` - Contains `com.pantrydates.notificationCheck`
+- `UIBackgroundModes` - Contains `fetch`
+
+The Info.plist is at the project root level (not inside the pantrydates source folder) to avoid conflicts with Xcode's file synchronization.

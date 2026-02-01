@@ -38,6 +38,12 @@ struct AppDatabase {
             }
         }
 
+        migrator.registerMigration("v4") { db in
+            try db.alter(table: "pantryItem") { t in
+                t.add(column: "notificationSent", .boolean).notNull().defaults(to: false)
+            }
+        }
+
         return migrator
     }
 }
@@ -102,6 +108,25 @@ extension AppDatabase {
         try writer.write { db in
             if var item = try PantryItem.fetchOne(db, key: id) {
                 item.flagged.toggle()
+                try item.update(db)
+            }
+        }
+    }
+
+    func fetchItemsPendingNotification() throws -> [PantryItem] {
+        try writer.read { db in
+            try PantryItem
+                .filter(Column("notificationDate") != nil)
+                .filter(Column("notificationSent") == false)
+                .filter(Column("notificationDate") <= Date())
+                .fetchAll(db)
+        }
+    }
+
+    func markNotificationSent(id: Int64) throws {
+        try writer.write { db in
+            if var item = try PantryItem.fetchOne(db, key: id) {
+                item.notificationSent = true
                 try item.update(db)
             }
         }

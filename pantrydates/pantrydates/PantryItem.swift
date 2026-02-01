@@ -11,4 +11,5 @@ struct PantryItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePers
     var expirationDate: Date
     var flagged: Bool = false
     var notificationDate: Date? = nil
+    var notificationSent: Bool = false
 }

@@ -52,8 +52,14 @@ struct ContentView: View {
                         }
                         .tint(.orange)
                     }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            deleteItem(item)
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                    }
                 }
-                .onDelete(perform: deleteItems)
             }
             .navigationTitle("Pantry")
             .navigationDestination(for: PantryItem.self) { item in
@@ -113,16 +119,13 @@ struct ContentView: View {
         }
     }
 
-    private func deleteItems(at offsets: IndexSet) {
-        for index in offsets {
-            let item = displayedItems[index]
-            do {
-                try database.deleteItem(item)
-            } catch {
-                print("Failed to delete item: \(error)")
-            }
+    private func deleteItem(_ item: PantryItem) {
+        do {
+            try database.deleteItem(item)
+            loadItems()
+        } catch {
+            print("Failed to delete item: \(error)")
         }
-        loadItems()
     }
 
     private func toggleFlagged(item: PantryItem) {

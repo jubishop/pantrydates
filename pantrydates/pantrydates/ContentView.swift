@@ -93,19 +93,23 @@ struct ContentView: View {
         }
         Spacer()
         VStack(alignment: .trailing, spacing: 2) {
+          let isExpired = Calendar.current.isDateInToday(item.expirationDate)
+            || item.expirationDate < Calendar.current.startOfDay(for: Date())
+          let isPast = item.expirationDate < Calendar.current.startOfDay(for: Date())
           HStack(spacing: 4) {
             Image(systemName: "calendar")
               .font(.caption2)
             Text(dateFormatter.string(from: item.expirationDate))
+              .fontWeight(isPast ? .bold : .regular)
           }
-          .foregroundStyle(.secondary)
+          .foregroundStyle(isExpired ? .red : .secondary)
           if let notificationDate = item.notificationDate {
             HStack(spacing: 4) {
               Image(systemName: "bell")
                 .font(.caption2)
               Text(dateFormatter.string(from: notificationDate))
             }
-            .foregroundStyle(.blue)
+            .foregroundStyle(item.notificationSent ? .green : .blue)
             .font(.caption)
           }
         }

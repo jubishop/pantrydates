@@ -5,7 +5,7 @@ import SwiftUI
 struct AddItemView: View {
   @Environment(\.dismiss) private var dismiss
 
-  let onSave: (String, Date, Bool, Date?) -> Void
+  let database: AppDatabase
 
   @State private var name: String = ""
   @State private var expirationDate: Date = Date()
@@ -32,7 +32,7 @@ struct AddItemView: View {
         }
         ToolbarItem(placement: .confirmationAction) {
           Button("Save") {
-            onSave(name, expirationDate, flagged, notificationDate)
+            saveItem()
             dismiss()
           }
           .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -40,12 +40,23 @@ struct AddItemView: View {
       }
     }
   }
+
+  private func saveItem() {
+    var newItem = PantryItem(
+      id: nil,
+      name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+      expirationDate: expirationDate,
+      flagged: flagged,
+      notificationDate: notificationDate
+    )
+    do {
+      try database.saveItem(&newItem)
+    } catch {
+      print("Failed to save item: \(error)")
+    }
+  }
 }
 
 #Preview {
-  AddItemView { name, date, flagged, notificationDate in
-    print(
-      "Added: \(name) - \(date) - flagged: \(flagged) - \(String(describing: notificationDate))"
-    )
-  }
+  AddItemView(database: try! AppDatabase.makeEmpty())
 }

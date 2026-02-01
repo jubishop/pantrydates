@@ -131,4 +131,11 @@ extension AppDatabase {
       }
     }
   }
+
+  func observeAllItems() -> AsyncValueObservation<[PantryItem]> {
+    let observation = ValueObservation.tracking { db in
+      try PantryItem.order(Column("expirationDate").asc).fetchAll(db)
+    }
+    return observation.values(in: writer)
+  }
 }

@@ -1,5 +1,6 @@
 // Copyright Justin Bishop, 2026
 
+import GRDB
 import SwiftUI
 
 struct ContentView: View {
@@ -15,56 +16,63 @@ struct ContentView: View {
 
   var body: some View {
     NavigationStack {
-      List {
-        ForEach(displayedItems) { item in
-          NavigationLink(value: item) {
-            HStack {
-              if item.flagged {
-                Image(systemName: "flag.fill")
-                  .foregroundStyle(.orange)
+      List(displayedItems) { item in
+        NavigationLink(value: item) {
+          HStack {
+            if item.flagged {
+              Image(systemName: "flag.fill")
+                .foregroundStyle(.orange)
+            }
+            Text(item.name)
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+              HStack(spacing: 4) {
+                Image(systemName: "calendar")
+                  .font(.caption2)
+                Text(item.expirationDate, style: .date)
               }
-              Text(item.name)
-              Spacer()
-              VStack(alignment: .trailing, spacing: 2) {
+              .foregroundStyle(.secondary)
+              if let notificationDate = item.notificationDate {
                 HStack(spacing: 4) {
-                  Image(systemName: "calendar")
+                  Image(systemName: "bell")
                     .font(.caption2)
-                  Text(item.expirationDate, style: .date)
+                  Text(notificationDate, style: .date)
                 }
-                .foregroundStyle(.secondary)
-                if let notificationDate = item.notificationDate {
-                  HStack(spacing: 4) {
-                    Image(systemName: "bell")
-                      .font(.caption2)
-                    Text(notificationDate, style: .date)
-                  }
-                  .foregroundStyle(.blue)
-                  .font(.caption)
-                }
+                .foregroundStyle(.blue)
+                .font(.caption)
               }
             }
           }
-          .swipeActions(edge: .leading) {
-            Button {
-              toggleFlagged(item: item)
-            } label: {
-              Image(systemName: item.flagged ? "flag.slash" : "flag")
-            }
-            .tint(.orange)
+        }
+        .swipeActions(edge: .leading) {
+          Button {
+            toggleFlagged(item: item)
+          } label: {
+            Image(systemName: item.flagged ? "flag.slash" : "flag")
           }
-          .swipeActions(edge: .trailing) {
-            Button(role: .destructive) {
-              deleteItem(item)
-            } label: {
-              Image(systemName: "trash")
-            }
+          .tint(.orange)
+        }
+        .swipeActions(edge: .trailing) {
+          Button(role: .destructive) {
+            deleteItem(item)
+          } label: {
+            Image(systemName: "trash")
           }
+        }
+      }
+      .task {
+        do {
+          for try await updatedItems in database.observeAllItems() {
+            items = updatedItems
+          }
+        } catch {
+          print("Failed to observe items: \(error)")
         }
       }
       .navigationTitle("Pantry")
       .navigationDestination(for: PantryItem.self) { item in
         if let id = item.id {
-          ItemDetailView(database: database, itemId: id, onDismiss: loadItems)
+          ItemDetailView(database: database, itemId: id)
         }
       }
       .toolbar {
@@ -85,44 +93,14 @@ struct ContentView: View {
         }
       }
       .sheet(isPresented: $showingAddSheet) {
-        AddItemView { name, date, flagged, notificationDate in
-          addItem(name: name, date: date, flagged: flagged, notificationDate: notificationDate)
-        }
+        AddItemView(database: database)
       }
-      .onAppear {
-        loadItems()
-      }
-    }
-  }
-
-  private func loadItems() {
-    do {
-      items = try database.fetchAllItems()
-    } catch {
-      print("Failed to load items: \(error)")
-    }
-  }
-
-  private func addItem(name: String, date: Date, flagged: Bool, notificationDate: Date?) {
-    var newItem = PantryItem(
-      id: nil,
-      name: name.trimmingCharacters(in: .whitespacesAndNewlines),
-      expirationDate: date,
-      flagged: flagged,
-      notificationDate: notificationDate
-    )
-    do {
-      try database.saveItem(&newItem)
-      loadItems()
-    } catch {
-      print("Failed to save item: \(error)")
     }
   }
 
   private func deleteItem(_ item: PantryItem) {
     do {
       try database.deleteItem(item)
-      loadItems()
     } catch {
       print("Failed to delete item: \(error)")
     }
@@ -132,7 +110,6 @@ struct ContentView: View {
     guard let id = item.id else { return }
     do {
       try database.toggleFlagged(id: id)
-      loadItems()
     } catch {
       print("Failed to toggle flagged: \(error)")
     }

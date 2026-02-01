@@ -7,7 +7,6 @@ struct ItemDetailView: View {
 
   let database: AppDatabase
   let itemId: Int64
-  let onDismiss: () -> Void
 
   @State private var name: String = ""
   @State private var expirationDate: Date = Date()
@@ -62,7 +61,6 @@ struct ItemDetailView: View {
     }
     .onDisappear {
       saveChanges()
-      onDismiss()
     }
   }
 

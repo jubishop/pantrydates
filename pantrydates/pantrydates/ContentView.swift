@@ -26,9 +26,7 @@ struct ContentView: View {
             .navigationTitle("Pantry")
             .navigationDestination(for: PantryItem.self) { item in
                 if let id = item.id {
-                    ItemDetailView(database: database, itemId: id) {
-                        loadItems()
-                    }
+                    ItemDetailView(database: database, itemId: id, onDismiss: loadItems)
                 }
             }
             .toolbar {

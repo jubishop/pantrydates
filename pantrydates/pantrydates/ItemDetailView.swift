@@ -51,6 +51,7 @@ struct ItemDetailView: View {
         }
         .onDisappear {
             saveChanges()
+            onDismiss()
         }
     }
 
@@ -83,7 +84,6 @@ struct ItemDetailView: View {
     private func deleteItem() {
         do {
             try database.deleteItem(id: itemId)
-            onDelete()
             dismiss()
         } catch {
             print("Failed to delete item: \(error)")

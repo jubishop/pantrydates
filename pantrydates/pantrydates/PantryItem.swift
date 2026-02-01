@@ -12,4 +12,9 @@ struct PantryItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePers
   var flagged: Bool = false
   var notificationDate: Date? = nil
   var notificationSent: Bool = false
+
+  // Update auto-incremented id upon successful insertion
+  mutating func didInsert(_ inserted: InsertionSuccess) {
+    id = inserted.rowID
+  }
 }

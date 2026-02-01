@@ -62,3 +62,9 @@ Each pantry item can have an optional `notificationDate` for reminders. The syst
 - `UIBackgroundModes` - Contains `fetch`
 
 The Info.plist is at the project root level (not inside the pantrydates source folder) to avoid conflicts with Xcode's file synchronization.
+
+## Error Handling
+
+Use `fatalError()` for scenarios that should never logically happen. If the code reaches a state that violates invariants or represents a programming error, fail loudly rather than silently. This makes bugs immediately visible during development instead of causing subtle issues later.
+
+Never force unwrap optionals using `!`. Use `guard let`, `if let`, or nil-coalescing (`??`) instead. If a value truly must exist, use `guard let value = optional else { fatalError("reason") }` to fail explicitly with context.

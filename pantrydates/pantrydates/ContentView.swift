@@ -51,9 +51,7 @@ struct ContentView: View {
       }
       .navigationTitle("Food")
       .navigationDestination(for: FoodItem.self) { item in
-        if let id = item.id {
-          ItemDetailView(database: database, itemId: id)
-        }
+        ItemDetailView(database: database, item: item)
       }
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {

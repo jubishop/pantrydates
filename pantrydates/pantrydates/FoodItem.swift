@@ -8,12 +8,32 @@ struct FoodItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePersis
 
   var id: Int64?
   var name: String
-  var notes: String = ""
+  var notes: String
   var expirationDate: Date
-  var flagged: Bool = false
-  var notificationDate: Date? = nil
-  var notificationSent: Bool = false
-  var refrigerated: Bool = false
+  var flagged: Bool
+  var notificationDate: Date?
+  var notificationSent: Bool
+  var refrigerated: Bool
+
+  init(
+    id: Int64? = nil,
+    name: String = "",  // Must be set before saving
+    notes: String = "",
+    expirationDate: Date = Date(),
+    flagged: Bool = false,
+    notificationDate: Date? = nil,
+    notificationSent: Bool = false,
+    refrigerated: Bool = false
+  ) {
+    self.id = id
+    self.name = name
+    self.notes = notes
+    self.expirationDate = expirationDate
+    self.flagged = flagged
+    self.notificationDate = notificationDate
+    self.notificationSent = notificationSent
+    self.refrigerated = refrigerated
+  }
 
   // Update auto-incremented id upon successful insertion
   mutating func didInsert(_ inserted: InsertionSuccess) {

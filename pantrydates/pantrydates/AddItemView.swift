@@ -7,24 +7,12 @@ struct AddItemView: View {
 
   let database: AppDatabase
 
-  @State private var name: String = ""
-  @State private var notes: String = ""
-  @State private var expirationDate: Date = Date()
-  @State private var flagged: Bool = false
-  @State private var refrigerated: Bool = false
-  @State private var notificationDate: Date? = nil
+  @State private var item = FoodItem()
 
   var body: some View {
     NavigationStack {
       Form {
-        ItemFormFields(
-          name: $name,
-          notes: $notes,
-          expirationDate: $expirationDate,
-          flagged: $flagged,
-          refrigerated: $refrigerated,
-          notificationDate: $notificationDate
-        )
+        ItemFormFields(item: $item)
       }
       .navigationTitle("New Item")
       .navigationBarTitleDisplayMode(.inline)
@@ -39,22 +27,16 @@ struct AddItemView: View {
             saveItem()
             dismiss()
           }
-          .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+          .disabled(item.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
       }
     }
   }
 
   private func saveItem() {
-    var newItem = FoodItem(
-      id: nil,
-      name: name.trimmingCharacters(in: .whitespacesAndNewlines),
-      notes: notes,
-      expirationDate: expirationDate,
-      flagged: flagged,
-      notificationDate: notificationDate,
-      refrigerated: refrigerated
-    )
+    var newItem = item
+    newItem.name = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    newItem.notes = item.notes.trimmingCharacters(in: .whitespacesAndNewlines)
     do {
       try database.saveItem(&newItem)
     } catch {

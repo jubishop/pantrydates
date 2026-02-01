@@ -21,31 +21,12 @@ struct ItemDetailView: View {
     Group {
       if itemExists {
         Form {
-          TextField("Item Name", text: $name)
-          DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
-          Toggle("Flagged", isOn: $flagged)
-
-          Section {
-            if let date = notificationDate {
-              DatePicker(
-                "Notification Date",
-                selection: Binding(
-                  get: { date },
-                  set: { notificationDate = $0 }
-                ),
-                displayedComponents: .date
-              )
-              Button("Remove Notification", role: .destructive) {
-                notificationDate = nil
-              }
-            } else {
-              Button("Add Notification Date") {
-                notificationDate = expirationDate
-              }
-            }
-          } header: {
-            Label("Notification", systemImage: "bell")
-          }
+          ItemFormFields(
+            name: $name,
+            expirationDate: $expirationDate,
+            flagged: $flagged,
+            notificationDate: $notificationDate
+          )
         }
       } else {
         ContentUnavailableView("Item Not Found", systemImage: "questionmark.circle")

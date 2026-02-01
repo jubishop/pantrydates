@@ -23,7 +23,14 @@ struct ContentView: View {
               Image(systemName: "flag.fill")
                 .foregroundStyle(.orange)
             }
-            Text(item.name)
+            VStack(alignment: .leading, spacing: 2) {
+              Text(item.name)
+              if !item.notes.isEmpty {
+                Text(item.notes)
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+              }
+            }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
               HStack(spacing: 4) {

@@ -8,6 +8,7 @@ struct AddItemView: View {
   let database: AppDatabase
 
   @State private var name: String = ""
+  @State private var notes: String = ""
   @State private var expirationDate: Date = Date()
   @State private var flagged: Bool = false
   @State private var notificationDate: Date? = nil
@@ -17,6 +18,7 @@ struct AddItemView: View {
       Form {
         ItemFormFields(
           name: $name,
+          notes: $notes,
           expirationDate: $expirationDate,
           flagged: $flagged,
           notificationDate: $notificationDate
@@ -45,6 +47,7 @@ struct AddItemView: View {
     var newItem = PantryItem(
       id: nil,
       name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+      notes: notes,
       expirationDate: expirationDate,
       flagged: flagged,
       notificationDate: notificationDate

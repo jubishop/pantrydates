@@ -4,12 +4,14 @@ import SwiftUI
 
 struct ItemFormFields: View {
   @Binding var name: String
+  @Binding var notes: String
   @Binding var expirationDate: Date
   @Binding var flagged: Bool
   @Binding var notificationDate: Date?
 
   var body: some View {
     TextField("Item Name", text: $name)
+    TextField("Notes", text: $notes)
     DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
     Toggle("Flagged", isOn: $flagged)
 

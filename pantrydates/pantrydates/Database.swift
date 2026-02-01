@@ -44,6 +44,12 @@ struct AppDatabase {
       }
     }
 
+    migrator.registerMigration("v5") { db in
+      try db.alter(table: "pantryItem") { t in
+        t.add(column: "notes", .text).notNull().defaults(to: "")
+      }
+    }
+
     return migrator
   }
 }

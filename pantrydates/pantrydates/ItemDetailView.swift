@@ -9,6 +9,7 @@ struct ItemDetailView: View {
   let itemId: Int64
 
   @State private var name: String = ""
+  @State private var notes: String = ""
   @State private var expirationDate: Date = Date()
   @State private var flagged: Bool = false
   @State private var notificationDate: Date? = nil
@@ -22,6 +23,7 @@ struct ItemDetailView: View {
         Form {
           ItemFormFields(
             name: $name,
+            notes: $notes,
             expirationDate: $expirationDate,
             flagged: $flagged,
             notificationDate: $notificationDate
@@ -68,6 +70,7 @@ struct ItemDetailView: View {
     do {
       if let item = try database.fetchItem(id: itemId) {
         name = item.name
+        notes = item.notes
         expirationDate = item.expirationDate
         flagged = item.flagged
         notificationDate = item.notificationDate
@@ -92,6 +95,7 @@ struct ItemDetailView: View {
     var updatedItem = PantryItem(
       id: itemId,
       name: trimmedName,
+      notes: notes,
       expirationDate: expirationDate,
       flagged: flagged,
       notificationDate: notificationDate,

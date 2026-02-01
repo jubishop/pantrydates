@@ -8,10 +8,19 @@ struct AddItemView: View {
   let database: AppDatabase
 
   @State private var item = FoodItem()
+  @State private var userDidSelectSymbol = false
+  @State private var isGeneratingSymbol = false
 
   var body: some View {
     NavigationStack {
       Form {
+        SymbolPickerSection(
+          symbolName: $item.symbolName,
+          userDidSelectSymbol: $userDidSelectSymbol,
+          itemName: item.name,
+          isGeneratingSymbol: isGeneratingSymbol,
+          onSuggestSymbol: suggestSymbol
+        )
         ItemFormFields(item: $item)
       }
       .navigationTitle("New Item")
@@ -33,17 +42,33 @@ struct AddItemView: View {
     }
   }
 
+  private func suggestSymbol() {
+    let name = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !name.isEmpty else { return }
+
+    isGeneratingSymbol = true
+    Task {
+      if let symbol = await SymbolService.shared.suggestSymbol(for: name) {
+        item.symbolName = symbol
+        userDidSelectSymbol = true
+      }
+      isGeneratingSymbol = false
+    }
+  }
+
   private func saveItem() {
     var newItem = item
     newItem.name = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
     newItem.notes = item.notes.trimmingCharacters(in: .whitespacesAndNewlines)
     do {
       let id = try database.saveItem(&newItem)
-      // Auto-generate symbol in background
-      let name = newItem.name
-      Task {
-        if let symbol = await SymbolService.shared.suggestSymbol(for: name) {
-          try? database.updateSymbol(id: id, symbolName: symbol)
+      // Auto-generate symbol in background only if user never selected one
+      if !userDidSelectSymbol {
+        let name = newItem.name
+        Task {
+          if let symbol = await SymbolService.shared.suggestSymbol(for: name) {
+            try? database.updateSymbol(id: id, symbolName: symbol)
+          }
         }
       }
     } catch {

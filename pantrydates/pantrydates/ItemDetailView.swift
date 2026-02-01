@@ -12,6 +12,7 @@ struct ItemDetailView: View {
   @State private var originalNotificationDate: Date?
   @State private var showDeleteConfirmation = false
   @State private var isGeneratingSymbol = false
+  @State private var userDidSelectSymbol = false
 
   init(database: AppDatabase, item: FoodItem) {
     self.database = database
@@ -22,30 +23,13 @@ struct ItemDetailView: View {
 
   var body: some View {
     Form {
-      Section {
-        HStack {
-          Spacer()
-          if isGeneratingSymbol {
-            ProgressView()
-              .frame(width: 48, height: 48)
-          } else {
-            Image(systemName: item.symbolName)
-              .font(.system(size: 48))
-              .foregroundStyle(.secondary)
-          }
-          Spacer()
-        }
-        .listRowBackground(Color.clear)
-
-        Button {
-          suggestSymbol()
-        } label: {
-          Label("Suggest Symbol", systemImage: "sparkles")
-        }
-        .disabled(
-          isGeneratingSymbol || item.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        )
-      }
+      SymbolPickerSection(
+        symbolName: $item.symbolName,
+        userDidSelectSymbol: $userDidSelectSymbol,
+        itemName: item.name,
+        isGeneratingSymbol: isGeneratingSymbol,
+        onSuggestSymbol: suggestSymbol
+      )
       ItemFormFields(item: $item)
     }
     .navigationTitle("Edit Item")
@@ -84,6 +68,7 @@ struct ItemDetailView: View {
     Task {
       if let symbol = await SymbolService.shared.suggestSymbol(for: name) {
         item.symbolName = symbol
+        userDidSelectSymbol = true
       }
       isGeneratingSymbol = false
     }
@@ -106,8 +91,8 @@ struct ItemDetailView: View {
 
     do {
       let id = try database.saveItem(&updatedItem)
-      // Auto-generate new symbol if name changed
-      if nameChanged {
+      // Auto-generate new symbol if name changed and user didn't manually select one
+      if nameChanged && !userDidSelectSymbol {
         Task {
           if let symbol = await SymbolService.shared.suggestSymbol(for: trimmedName) {
             try? database.updateSymbol(id: id, symbolName: symbol)

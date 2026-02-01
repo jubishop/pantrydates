@@ -14,6 +14,7 @@ struct FoodItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePersis
   var notificationDate: Date?
   var notificationSent: Bool
   var refrigerated: Bool
+  var symbolName: String
 
   init(
     id: Int64? = nil,
@@ -23,7 +24,8 @@ struct FoodItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePersis
     flagged: Bool = false,
     notificationDate: Date? = nil,
     notificationSent: Bool = false,
-    refrigerated: Bool = false
+    refrigerated: Bool = false,
+    symbolName: String = "fork.knife"
   ) {
     self.id = id
     self.name = name
@@ -33,6 +35,7 @@ struct FoodItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePersis
     self.notificationDate = notificationDate
     self.notificationSent = notificationSent
     self.refrigerated = refrigerated
+    self.symbolName = symbolName
   }
 
   // Update auto-incremented id upon successful insertion

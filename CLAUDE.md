@@ -8,7 +8,7 @@ This is an Xcode project. Open `pantrydates/pantrydates.xcodeproj` in Xcode to b
 
 ## Architecture
 
-SwiftUI iOS app using GRDB.swift for SQLite persistence.
+SwiftUI iOS 26+ app using GRDB.swift for SQLite persistence.
 
 **Key files:**
 - `FoodItem.swift` - Model conforming to GRDB's `FetchableRecord` and `MutablePersistableRecord`
@@ -17,6 +17,7 @@ SwiftUI iOS app using GRDB.swift for SQLite persistence.
 - `ItemDetailView.swift` - Edit view for individual items
 - `AddItemView.swift` - Sheet for creating new items
 - `NotificationManager.swift` - Background task scheduling and local notification delivery
+- `SymbolService.swift` - Apple Intelligence integration for SF Symbol suggestions
 
 **Data flow:**
 - `pantrydatesApp` creates `AppDatabase` and passes it to views
@@ -35,6 +36,7 @@ Migrations are in `Database.swift` under the `migrator` property. Add new migrat
 - v5: Add `notes` text field
 - v6: Rename table from `pantryItem` to `foodItem`
 - v7: Add `refrigerated` boolean
+- v8: Add `symbolName` text field (defaults to `fork.knife`)
 
 ## Adding New Fields
 
@@ -62,6 +64,19 @@ Each pantry item can have an optional `notificationDate` for reminders. The syst
 - `UIBackgroundModes` - Contains `fetch`
 
 The Info.plist is at the project root level (not inside the pantrydates source folder) to avoid conflicts with Xcode's file synchronization.
+
+## Symbol System
+
+Each food item has an SF Symbol for visual identification, suggested by Apple Intelligence.
+
+**How it works:**
+- `symbolName` (text) - SF Symbol name for the item, defaults to `fork.knife`
+- Uses the Foundation Models framework with `@Generable` for structured output
+- Symbols are auto-generated when creating new items or changing an item's name
+- User can manually regenerate via "Suggest Symbol" button in ItemDetailView
+
+**Fallback behavior:**
+- If AI generation fails, the existing symbol is preserved
 
 ## Error Handling
 

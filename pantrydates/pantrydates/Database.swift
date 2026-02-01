@@ -60,6 +60,12 @@ struct AppDatabase {
       }
     }
 
+    migrator.registerMigration("v8") { db in
+      try db.alter(table: "foodItem") { t in
+        t.add(column: "symbolName", .text).notNull().defaults(to: "fork.knife")
+      }
+    }
+
     return migrator
   }
 }
@@ -102,10 +108,15 @@ extension AppDatabase {
     }
   }
 
-  func saveItem(_ item: inout FoodItem) throws {
+  @discardableResult
+  func saveItem(_ item: inout FoodItem) throws -> Int64 {
     try writer.write { db in
       try item.save(db)
     }
+    guard let id = item.id else {
+      fatalError("ID should always be set after successful save")
+    }
+    return id
   }
 
   func deleteItem(_ item: FoodItem) throws {
@@ -153,5 +164,14 @@ extension AppDatabase {
       try FoodItem.order(Column("expirationDate").asc).fetchAll(db)
     }
     return observation.values(in: writer)
+  }
+
+  func updateSymbol(id: Int64, symbolName: String) throws {
+    try writer.write { db in
+      if var item = try FoodItem.fetchOne(db, key: id) {
+        item.symbolName = symbolName
+        try item.update(db)
+      }
+    }
   }
 }

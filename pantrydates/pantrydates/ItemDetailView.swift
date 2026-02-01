@@ -8,17 +8,44 @@ struct ItemDetailView: View {
   let database: AppDatabase
 
   @State private var item: FoodItem
+  @State private var originalName: String
   @State private var originalNotificationDate: Date?
   @State private var showDeleteConfirmation = false
+  @State private var isGeneratingSymbol = false
 
   init(database: AppDatabase, item: FoodItem) {
     self.database = database
     _item = State(initialValue: item)
+    _originalName = State(initialValue: item.name)
     _originalNotificationDate = State(initialValue: item.notificationDate)
   }
 
   var body: some View {
     Form {
+      Section {
+        HStack {
+          Spacer()
+          if isGeneratingSymbol {
+            ProgressView()
+              .frame(width: 48, height: 48)
+          } else {
+            Image(systemName: item.symbolName)
+              .font(.system(size: 48))
+              .foregroundStyle(.secondary)
+          }
+          Spacer()
+        }
+        .listRowBackground(Color.clear)
+
+        Button {
+          suggestSymbol()
+        } label: {
+          Label("Suggest Symbol", systemImage: "sparkles")
+        }
+        .disabled(
+          isGeneratingSymbol || item.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        )
+      }
       ItemFormFields(item: $item)
     }
     .navigationTitle("Edit Item")
@@ -49,11 +76,24 @@ struct ItemDetailView: View {
     }
   }
 
+  private func suggestSymbol() {
+    let name = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !name.isEmpty else { return }
+
+    isGeneratingSymbol = true
+    Task {
+      if let symbol = await SymbolService.shared.suggestSymbol(for: name) {
+        item.symbolName = symbol
+      }
+      isGeneratingSymbol = false
+    }
+  }
+
   private func saveChanges() {
     let trimmedName = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !trimmedName.isEmpty else { return }
 
-    // Reset notificationSent if the notification date changed
+    let nameChanged = trimmedName != originalName
     let notificationDateChanged = item.notificationDate != originalNotificationDate
 
     var updatedItem = item
@@ -65,7 +105,15 @@ struct ItemDetailView: View {
     }
 
     do {
-      try database.saveItem(&updatedItem)
+      let id = try database.saveItem(&updatedItem)
+      // Auto-generate new symbol if name changed
+      if nameChanged {
+        Task {
+          if let symbol = await SymbolService.shared.suggestSymbol(for: trimmedName) {
+            try? database.updateSymbol(id: id, symbolName: symbol)
+          }
+        }
+      }
     } catch {
       print("Failed to save item: \(error)")
     }

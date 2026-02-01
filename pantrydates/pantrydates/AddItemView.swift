@@ -38,7 +38,14 @@ struct AddItemView: View {
     newItem.name = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
     newItem.notes = item.notes.trimmingCharacters(in: .whitespacesAndNewlines)
     do {
-      try database.saveItem(&newItem)
+      let id = try database.saveItem(&newItem)
+      // Auto-generate symbol in background
+      let name = newItem.name
+      Task {
+        if let symbol = await SymbolService.shared.suggestSymbol(for: name) {
+          try? database.updateSymbol(id: id, symbolName: symbol)
+        }
+      }
     } catch {
       print("Failed to save item: \(error)")
     }

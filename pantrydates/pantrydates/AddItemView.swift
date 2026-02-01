@@ -11,6 +11,7 @@ struct AddItemView: View {
   @State private var notes: String = ""
   @State private var expirationDate: Date = Date()
   @State private var flagged: Bool = false
+  @State private var refrigerated: Bool = false
   @State private var notificationDate: Date? = nil
 
   var body: some View {
@@ -21,6 +22,7 @@ struct AddItemView: View {
           notes: $notes,
           expirationDate: $expirationDate,
           flagged: $flagged,
+          refrigerated: $refrigerated,
           notificationDate: $notificationDate
         )
       }
@@ -50,7 +52,8 @@ struct AddItemView: View {
       notes: notes,
       expirationDate: expirationDate,
       flagged: flagged,
-      notificationDate: notificationDate
+      notificationDate: notificationDate,
+      refrigerated: refrigerated
     )
     do {
       try database.saveItem(&newItem)

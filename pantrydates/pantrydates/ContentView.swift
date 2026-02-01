@@ -16,60 +16,27 @@ struct ContentView: View {
     return formatter
   }()
 
-  private var displayedItems: [FoodItem] {
-    showFlaggedOnly ? items.filter { $0.flagged } : items
+  private var pantryItems: [FoodItem] {
+    let filtered = showFlaggedOnly ? items.filter { $0.flagged } : items
+    return filtered.filter { !$0.refrigerated }
+  }
+
+  private var fridgeItems: [FoodItem] {
+    let filtered = showFlaggedOnly ? items.filter { $0.flagged } : items
+    return filtered.filter { $0.refrigerated }
   }
 
   var body: some View {
     NavigationStack {
-      List(displayedItems) { item in
-        NavigationLink(value: item) {
-          HStack {
-            if item.flagged {
-              Image(systemName: "flag.fill")
-                .foregroundStyle(.orange)
-            }
-            VStack(alignment: .leading, spacing: 2) {
-              Text(item.name)
-              if !item.notes.isEmpty {
-                Text(item.notes)
-                  .font(.caption)
-                  .foregroundStyle(.secondary)
-              }
-            }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-              HStack(spacing: 4) {
-                Image(systemName: "calendar")
-                  .font(.caption2)
-                Text(dateFormatter.string(from: item.expirationDate))
-              }
-              .foregroundStyle(.secondary)
-              if let notificationDate = item.notificationDate {
-                HStack(spacing: 4) {
-                  Image(systemName: "bell")
-                    .font(.caption2)
-                  Text(dateFormatter.string(from: notificationDate))
-                }
-                .foregroundStyle(.blue)
-                .font(.caption)
-              }
-            }
+      List {
+        Section("Pantry") {
+          ForEach(pantryItems) { item in
+            itemRow(item)
           }
         }
-        .swipeActions(edge: .leading) {
-          Button {
-            toggleFlagged(item: item)
-          } label: {
-            Image(systemName: item.flagged ? "flag.slash" : "flag")
-          }
-          .tint(.orange)
-        }
-        .swipeActions(edge: .trailing) {
-          Button(role: .destructive) {
-            deleteItem(item)
-          } label: {
-            Image(systemName: "trash")
+        Section("Fridge") {
+          ForEach(fridgeItems) { item in
+            itemRow(item)
           }
         }
       }
@@ -82,7 +49,7 @@ struct ContentView: View {
           print("Failed to observe items: \(error)")
         }
       }
-      .navigationTitle("Pantry")
+      .navigationTitle("Food")
       .navigationDestination(for: FoodItem.self) { item in
         if let id = item.id {
           ItemDetailView(database: database, itemId: id)
@@ -107,6 +74,59 @@ struct ContentView: View {
       }
       .sheet(isPresented: $showingAddSheet) {
         AddItemView(database: database)
+      }
+    }
+  }
+
+  @ViewBuilder
+  private func itemRow(_ item: FoodItem) -> some View {
+    NavigationLink(value: item) {
+      HStack {
+        if item.flagged {
+          Image(systemName: "flag.fill")
+            .foregroundStyle(.orange)
+        }
+        VStack(alignment: .leading, spacing: 2) {
+          Text(item.name)
+          if !item.notes.isEmpty {
+            Text(item.notes)
+              .font(.caption)
+              .foregroundStyle(.secondary)
+          }
+        }
+        Spacer()
+        VStack(alignment: .trailing, spacing: 2) {
+          HStack(spacing: 4) {
+            Image(systemName: "calendar")
+              .font(.caption2)
+            Text(dateFormatter.string(from: item.expirationDate))
+          }
+          .foregroundStyle(.secondary)
+          if let notificationDate = item.notificationDate {
+            HStack(spacing: 4) {
+              Image(systemName: "bell")
+                .font(.caption2)
+              Text(dateFormatter.string(from: notificationDate))
+            }
+            .foregroundStyle(.blue)
+            .font(.caption)
+          }
+        }
+      }
+    }
+    .swipeActions(edge: .leading) {
+      Button {
+        toggleFlagged(item: item)
+      } label: {
+        Image(systemName: item.flagged ? "flag.slash" : "flag")
+      }
+      .tint(.orange)
+    }
+    .swipeActions(edge: .trailing) {
+      Button(role: .destructive) {
+        deleteItem(item)
+      } label: {
+        Image(systemName: "trash")
       }
     }
   }

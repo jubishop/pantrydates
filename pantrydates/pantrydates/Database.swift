@@ -54,6 +54,12 @@ struct AppDatabase {
       try db.rename(table: "pantryItem", to: "foodItem")
     }
 
+    migrator.registerMigration("v7") { db in
+      try db.alter(table: "foodItem") { t in
+        t.add(column: "refrigerated", .boolean).notNull().defaults(to: false)
+      }
+    }
+
     return migrator
   }
 }

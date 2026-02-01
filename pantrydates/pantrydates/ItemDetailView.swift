@@ -12,6 +12,7 @@ struct ItemDetailView: View {
   @State private var notes: String = ""
   @State private var expirationDate: Date = Date()
   @State private var flagged: Bool = false
+  @State private var refrigerated: Bool = false
   @State private var notificationDate: Date? = nil
   @State private var originalNotificationDate: Date? = nil
   @State private var showDeleteConfirmation = false
@@ -26,6 +27,7 @@ struct ItemDetailView: View {
             notes: $notes,
             expirationDate: $expirationDate,
             flagged: $flagged,
+            refrigerated: $refrigerated,
             notificationDate: $notificationDate
           )
         }
@@ -73,6 +75,7 @@ struct ItemDetailView: View {
         notes = item.notes
         expirationDate = item.expirationDate
         flagged = item.flagged
+        refrigerated = item.refrigerated
         notificationDate = item.notificationDate
         originalNotificationDate = item.notificationDate
       } else {
@@ -99,7 +102,8 @@ struct ItemDetailView: View {
       expirationDate: expirationDate,
       flagged: flagged,
       notificationDate: notificationDate,
-      notificationSent: notificationSent ?? false
+      notificationSent: notificationSent ?? false,
+      refrigerated: refrigerated
     )
 
     // If date didn't change, we need to preserve the existing notificationSent value

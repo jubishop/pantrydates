@@ -7,6 +7,7 @@ struct ItemFormFields: View {
   @Binding var notes: String
   @Binding var expirationDate: Date
   @Binding var flagged: Bool
+  @Binding var refrigerated: Bool
   @Binding var notificationDate: Date?
 
   var body: some View {
@@ -14,6 +15,7 @@ struct ItemFormFields: View {
     TextField("Notes", text: $notes)
     DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
     Toggle("Flagged", isOn: $flagged)
+    Toggle("Refrigerated", isOn: $refrigerated)
 
     Section {
       if let date = notificationDate {

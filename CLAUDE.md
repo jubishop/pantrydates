@@ -34,6 +34,7 @@ Migrations are in `Database.swift` under the `migrator` property. Add new migrat
 - v4: Add `notificationSent` boolean
 - v5: Add `notes` text field
 - v6: Rename table from `pantryItem` to `foodItem`
+- v7: Add `refrigerated` boolean
 
 ## Adding New Fields
 

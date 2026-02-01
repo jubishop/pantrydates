@@ -13,6 +13,7 @@ struct FoodItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePersis
   var flagged: Bool = false
   var notificationDate: Date? = nil
   var notificationSent: Bool = false
+  var refrigerated: Bool = false
 
   // Update auto-incremented id upon successful insertion
   mutating func didInsert(_ inserted: InsertionSuccess) {

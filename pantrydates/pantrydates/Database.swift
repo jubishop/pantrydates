@@ -64,7 +64,7 @@ extension AppDatabase {
 extension AppDatabase {
     func fetchAllItems() throws -> [PantryItem] {
         try writer.read { db in
-            try PantryItem.order(Column("expirationDate")).fetchAll(db)
+            try PantryItem.order(Column("expirationDate").asc).fetchAll(db)
         }
     }
 

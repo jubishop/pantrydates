@@ -7,11 +7,16 @@ struct ContentView: View {
 
     @State private var items: [PantryItem] = []
     @State private var showingAddSheet = false
+    @State private var showFlaggedOnly = false
+
+    private var displayedItems: [PantryItem] {
+        showFlaggedOnly ? items.filter { $0.flagged } : items
+    }
 
     var body: some View {
         NavigationStack {
             List {
-                ForEach(items) { item in
+                ForEach(displayedItems) { item in
                     NavigationLink(value: item) {
                         HStack {
                             if item.flagged {
@@ -42,6 +47,14 @@ struct ContentView: View {
                 }
             }
             .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        showFlaggedOnly.toggle()
+                    } label: {
+                        Image(systemName: showFlaggedOnly ? "flag.fill" : "flag")
+                    }
+                    .tint(showFlaggedOnly ? .orange : nil)
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         showingAddSheet = true
@@ -85,7 +98,7 @@ struct ContentView: View {
 
     private func deleteItems(at offsets: IndexSet) {
         for index in offsets {
-            let item = items[index]
+            let item = displayedItems[index]
             do {
                 try database.deleteItem(item)
             } catch {

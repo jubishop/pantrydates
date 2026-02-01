@@ -92,7 +92,7 @@ struct ItemDetailView: View {
     let notificationDateChanged = notificationDate != originalNotificationDate
     let notificationSent = notificationDateChanged ? false : nil  // nil means keep existing value
 
-    var updatedItem = PantryItem(
+    var updatedItem = FoodItem(
       id: itemId,
       name: trimmedName,
       notes: notes,

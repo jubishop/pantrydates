@@ -3,8 +3,8 @@
 import Foundation
 import GRDB
 
-struct PantryItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePersistableRecord {
-  static let databaseTableName = "pantryItem"
+struct FoodItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePersistableRecord {
+  static let databaseTableName = "foodItem"
 
   var id: Int64?
   var name: String

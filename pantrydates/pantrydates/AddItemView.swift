@@ -44,7 +44,7 @@ struct AddItemView: View {
   }
 
   private func saveItem() {
-    var newItem = PantryItem(
+    var newItem = FoodItem(
       id: nil,
       name: name.trimmingCharacters(in: .whitespacesAndNewlines),
       notes: notes,

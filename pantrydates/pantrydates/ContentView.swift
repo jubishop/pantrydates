@@ -6,7 +6,7 @@ import SwiftUI
 struct ContentView: View {
   let database: AppDatabase
 
-  @State private var items: [PantryItem] = []
+  @State private var items: [FoodItem] = []
   @State private var showingAddSheet = false
   @State private var showFlaggedOnly = false
 
@@ -16,7 +16,7 @@ struct ContentView: View {
     return formatter
   }()
 
-  private var displayedItems: [PantryItem] {
+  private var displayedItems: [FoodItem] {
     showFlaggedOnly ? items.filter { $0.flagged } : items
   }
 
@@ -83,7 +83,7 @@ struct ContentView: View {
         }
       }
       .navigationTitle("Pantry")
-      .navigationDestination(for: PantryItem.self) { item in
+      .navigationDestination(for: FoodItem.self) { item in
         if let id = item.id {
           ItemDetailView(database: database, itemId: id)
         }
@@ -111,7 +111,7 @@ struct ContentView: View {
     }
   }
 
-  private func deleteItem(_ item: PantryItem) {
+  private func deleteItem(_ item: FoodItem) {
     do {
       try database.deleteItem(item)
     } catch {
@@ -119,7 +119,7 @@ struct ContentView: View {
     }
   }
 
-  private func toggleFlagged(item: PantryItem) {
+  private func toggleFlagged(item: FoodItem) {
     guard let id = item.id else { return }
     do {
       try database.toggleFlagged(id: id)

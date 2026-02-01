@@ -50,6 +50,10 @@ struct AppDatabase {
       }
     }
 
+    migrator.registerMigration("v6") { db in
+      try db.rename(table: "pantryItem", to: "foodItem")
+    }
+
     return migrator
   }
 }
@@ -80,25 +84,25 @@ extension AppDatabase {
 // MARK: - Database Access
 
 extension AppDatabase {
-  func fetchAllItems() throws -> [PantryItem] {
+  func fetchAllItems() throws -> [FoodItem] {
     try writer.read { db in
-      try PantryItem.order(Column("expirationDate").asc).fetchAll(db)
+      try FoodItem.order(Column("expirationDate").asc).fetchAll(db)
     }
   }
 
-  func fetchItem(id: Int64) throws -> PantryItem? {
+  func fetchItem(id: Int64) throws -> FoodItem? {
     try writer.read { db in
-      try PantryItem.fetchOne(db, key: id)
+      try FoodItem.fetchOne(db, key: id)
     }
   }
 
-  func saveItem(_ item: inout PantryItem) throws {
+  func saveItem(_ item: inout FoodItem) throws {
     try writer.write { db in
       try item.save(db)
     }
   }
 
-  func deleteItem(_ item: PantryItem) throws {
+  func deleteItem(_ item: FoodItem) throws {
     try writer.write { db in
       _ = try item.delete(db)
     }
@@ -106,22 +110,22 @@ extension AppDatabase {
 
   func deleteItem(id: Int64) throws {
     try writer.write { db in
-      _ = try PantryItem.deleteOne(db, key: id)
+      _ = try FoodItem.deleteOne(db, key: id)
     }
   }
 
   func toggleFlagged(id: Int64) throws {
     try writer.write { db in
-      if var item = try PantryItem.fetchOne(db, key: id) {
+      if var item = try FoodItem.fetchOne(db, key: id) {
         item.flagged.toggle()
         try item.update(db)
       }
     }
   }
 
-  func fetchItemsPendingNotification() throws -> [PantryItem] {
+  func fetchItemsPendingNotification() throws -> [FoodItem] {
     try writer.read { db in
-      try PantryItem
+      try FoodItem
         .filter(Column("notificationDate") != nil)
         .filter(Column("notificationSent") == false)
         .filter(Column("notificationDate") <= Date())
@@ -131,16 +135,16 @@ extension AppDatabase {
 
   func markNotificationSent(id: Int64) throws {
     try writer.write { db in
-      if var item = try PantryItem.fetchOne(db, key: id) {
+      if var item = try FoodItem.fetchOne(db, key: id) {
         item.notificationSent = true
         try item.update(db)
       }
     }
   }
 
-  func observeAllItems() -> AsyncValueObservation<[PantryItem]> {
+  func observeAllItems() -> AsyncValueObservation<[FoodItem]> {
     let observation = ValueObservation.tracking { db in
-      try PantryItem.order(Column("expirationDate").asc).fetchAll(db)
+      try FoodItem.order(Column("expirationDate").asc).fetchAll(db)
     }
     return observation.values(in: writer)
   }

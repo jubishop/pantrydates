@@ -11,7 +11,7 @@ This is an Xcode project. Open `pantrydates/pantrydates.xcodeproj` in Xcode to b
 SwiftUI iOS app using GRDB.swift for SQLite persistence.
 
 **Key files:**
-- `PantryItem.swift` - Model conforming to GRDB's `FetchableRecord` and `MutablePersistableRecord`
+- `FoodItem.swift` - Model conforming to GRDB's `FetchableRecord` and `MutablePersistableRecord`
 - `Database.swift` - `AppDatabase` struct containing migrations and all database operations
 - `ContentView.swift` - Main list view with filtering and swipe actions
 - `ItemDetailView.swift` - Edit view for individual items
@@ -32,10 +32,12 @@ Migrations are in `Database.swift` under the `migrator` property. Add new migrat
 - v2: Add `flagged` boolean
 - v3: Add `notificationDate` (optional datetime)
 - v4: Add `notificationSent` boolean
+- v5: Add `notes` text field
+- v6: Rename table from `pantryItem` to `foodItem`
 
 ## Adding New Fields
 
-1. Add property to `PantryItem` struct with a default value
+1. Add property to `FoodItem` struct with a default value
 2. Add migration in `Database.swift` to alter the table
 3. Update views to display/edit the new field
 

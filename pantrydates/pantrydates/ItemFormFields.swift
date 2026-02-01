@@ -4,9 +4,18 @@ import SwiftUI
 
 struct ItemFormFields: View {
   @Binding var item: FoodItem
+  var autoFocusName: Bool = false
+
+  @FocusState private var isNameFocused: Bool
 
   var body: some View {
     TextField("Item Name", text: $item.name)
+      .focused($isNameFocused)
+      .onAppear {
+        if autoFocusName {
+          isNameFocused = true
+        }
+      }
     TextField("Notes", text: $item.notes)
     DatePicker("Expiration Date", selection: $item.expirationDate, displayedComponents: .date)
     Toggle("Flagged", isOn: $item.flagged)

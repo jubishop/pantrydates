@@ -21,7 +21,7 @@ struct AddItemView: View {
           isGeneratingSymbol: isGeneratingSymbol,
           onSuggestSymbol: suggestSymbol
         )
-        ItemFormFields(item: $item)
+        ItemFormFields(item: $item, autoFocusName: true)
       }
       .navigationTitle("New Item")
       .navigationBarTitleDisplayMode(.inline)

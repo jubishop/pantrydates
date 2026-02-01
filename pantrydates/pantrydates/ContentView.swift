@@ -81,12 +81,8 @@ struct ContentView: View {
     NavigationLink(value: item) {
       HStack {
         Image(systemName: item.symbolName)
-          .foregroundStyle(.secondary)
+          .foregroundStyle(item.flagged ? .orange : .secondary)
           .frame(width: 24)
-        if item.flagged {
-          Image(systemName: "flag.fill")
-            .foregroundStyle(.orange)
-        }
         VStack(alignment: .leading, spacing: 2) {
           Text(item.name)
           if !item.notes.isEmpty {

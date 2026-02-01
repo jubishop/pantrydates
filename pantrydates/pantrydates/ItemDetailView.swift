@@ -7,52 +7,28 @@ struct ItemDetailView: View {
 
     let database: AppDatabase
     let itemId: Int64
-    let onDelete: () -> Void
+    let onDismiss: () -> Void
 
-    @State private var item: PantryItem?
-    @State private var isEditing = false
-    @State private var editedName: String = ""
-    @State private var editedDate: Date = Date()
+    @State private var name: String = ""
+    @State private var expirationDate: Date = Date()
     @State private var showDeleteConfirmation = false
+    @State private var itemExists = true
 
     var body: some View {
         Group {
-            if let item {
+            if itemExists {
                 Form {
-                    if isEditing {
-                        Section {
-                            TextField("Item Name", text: $editedName)
-                            DatePicker("Expiration Date", selection: $editedDate, displayedComponents: .date)
-                        }
-                    } else {
-                        Section("Name") {
-                            Text(item.name)
-                        }
-                        Section("Expiration Date") {
-                            Text(item.expirationDate, style: .date)
-                        }
-                    }
+                    TextField("Item Name", text: $name)
+                    DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
                 }
             } else {
                 ContentUnavailableView("Item Not Found", systemImage: "questionmark.circle")
             }
         }
-        .navigationTitle(item?.name ?? "Item Details")
+        .navigationTitle("Edit Item")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if item != nil {
-                ToolbarItem(placement: .primaryAction) {
-                    if isEditing {
-                        Button("Done") {
-                            saveChanges()
-                        }
-                        .disabled(editedName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    } else {
-                        Button("Edit") {
-                            startEditing()
-                        }
-                    }
-                }
+            if itemExists {
                 ToolbarItem(placement: .destructiveAction) {
                     Button(role: .destructive) {
                         showDeleteConfirmation = true
@@ -73,41 +49,40 @@ struct ItemDetailView: View {
         .task {
             loadItem()
         }
+        .onDisappear {
+            saveChanges()
+        }
     }
 
     private func loadItem() {
         do {
-            item = try database.fetchItem(id: itemId)
+            if let item = try database.fetchItem(id: itemId) {
+                name = item.name
+                expirationDate = item.expirationDate
+            } else {
+                itemExists = false
+            }
         } catch {
             print("Failed to load item: \(error)")
+            itemExists = false
         }
     }
 
-    private func startEditing() {
-        guard let item else { return }
-        editedName = item.name
-        editedDate = item.expirationDate
-        isEditing = true
-    }
-
     private func saveChanges() {
-        guard var updatedItem = item else { return }
-        updatedItem.name = editedName.trimmingCharacters(in: .whitespacesAndNewlines)
-        updatedItem.expirationDate = editedDate
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty, itemExists else { return }
 
+        var updatedItem = PantryItem(id: itemId, name: trimmedName, expirationDate: expirationDate)
         do {
             try database.saveItem(&updatedItem)
-            item = updatedItem
-            isEditing = false
         } catch {
             print("Failed to save item: \(error)")
         }
     }
 
     private func deleteItem() {
-        guard let item else { return }
         do {
-            try database.deleteItem(item)
+            try database.deleteItem(id: itemId)
             onDelete()
             dismiss()
         } catch {

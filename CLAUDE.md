@@ -25,7 +25,13 @@ SwiftUI iOS app using GRDB.swift for SQLite persistence.
 
 ## Database Migrations
 
-Migrations are in `Database.swift` under the `migrator` property. Add new migrations sequentially (v3, v4, etc.). In DEBUG builds, `eraseDatabaseOnSchemaChange = true` automatically resets the database when schema changes.
+Migrations are in `Database.swift` under the `migrator` property. Add new migrations sequentially (v5, v6, etc.). In DEBUG builds, `eraseDatabaseOnSchemaChange = true` automatically resets the database when schema changes.
+
+**Current migrations:**
+- v1: Create `pantryItem` table with `id`, `name`, `expirationDate`
+- v2: Add `flagged` boolean
+- v3: Add `notificationDate` (optional datetime)
+- v4: Add `notificationSent` boolean
 
 ## Adding New Fields
 

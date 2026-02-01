@@ -32,6 +32,12 @@ struct AppDatabase {
             }
         }
 
+        migrator.registerMigration("v3") { db in
+            try db.alter(table: "pantryItem") { t in
+                t.add(column: "notificationDate", .datetime)
+            }
+        }
+
         return migrator
     }
 }

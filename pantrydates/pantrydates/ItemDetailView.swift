@@ -12,6 +12,7 @@ struct ItemDetailView: View {
     @State private var name: String = ""
     @State private var expirationDate: Date = Date()
     @State private var flagged: Bool = false
+    @State private var notificationDate: Date? = nil
     @State private var showDeleteConfirmation = false
     @State private var itemExists = true
 
@@ -22,6 +23,24 @@ struct ItemDetailView: View {
                     TextField("Item Name", text: $name)
                     DatePicker("Expiration Date", selection: $expirationDate, displayedComponents: .date)
                     Toggle("Flagged", isOn: $flagged)
+
+                    Section {
+                        if let date = notificationDate {
+                            DatePicker("Notification Date", selection: Binding(
+                                get: { date },
+                                set: { notificationDate = $0 }
+                            ), displayedComponents: .date)
+                            Button("Remove Notification", role: .destructive) {
+                                notificationDate = nil
+                            }
+                        } else {
+                            Button("Add Notification Date") {
+                                notificationDate = expirationDate
+                            }
+                        }
+                    } header: {
+                        Label("Notification", systemImage: "bell")
+                    }
                 }
             } else {
                 ContentUnavailableView("Item Not Found", systemImage: "questionmark.circle")
@@ -63,6 +82,7 @@ struct ItemDetailView: View {
                 name = item.name
                 expirationDate = item.expirationDate
                 flagged = item.flagged
+                notificationDate = item.notificationDate
             } else {
                 itemExists = false
             }
@@ -76,7 +96,7 @@ struct ItemDetailView: View {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty, itemExists else { return }
 
-        var updatedItem = PantryItem(id: itemId, name: trimmedName, expirationDate: expirationDate, flagged: flagged)
+        var updatedItem = PantryItem(id: itemId, name: trimmedName, expirationDate: expirationDate, flagged: flagged, notificationDate: notificationDate)
         do {
             try database.saveItem(&updatedItem)
         } catch {

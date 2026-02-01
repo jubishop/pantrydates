@@ -25,8 +25,23 @@ struct ContentView: View {
                             }
                             Text(item.name)
                             Spacer()
-                            Text(item.expirationDate, style: .date)
+                            VStack(alignment: .trailing, spacing: 2) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "calendar")
+                                        .font(.caption2)
+                                    Text(item.expirationDate, style: .date)
+                                }
                                 .foregroundStyle(.secondary)
+                                if let notificationDate = item.notificationDate {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "bell")
+                                            .font(.caption2)
+                                        Text(notificationDate, style: .date)
+                                    }
+                                    .foregroundStyle(.blue)
+                                    .font(.caption)
+                                }
+                            }
                         }
                     }
                     .swipeActions(edge: .leading) {

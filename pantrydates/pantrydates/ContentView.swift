@@ -79,8 +79,8 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showingAddSheet) {
-                AddItemView { name, date in
-                    addItem(name: name, date: date)
+                AddItemView { name, date, flagged, notificationDate in
+                    addItem(name: name, date: date, flagged: flagged, notificationDate: notificationDate)
                 }
             }
             .onAppear {
@@ -97,11 +97,13 @@ struct ContentView: View {
         }
     }
 
-    private func addItem(name: String, date: Date) {
+    private func addItem(name: String, date: Date, flagged: Bool, notificationDate: Date?) {
         var newItem = PantryItem(
             id: nil,
             name: name.trimmingCharacters(in: .whitespacesAndNewlines),
-            expirationDate: date
+            expirationDate: date,
+            flagged: flagged,
+            notificationDate: notificationDate
         )
         do {
             try database.saveItem(&newItem)

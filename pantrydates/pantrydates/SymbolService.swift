@@ -77,36 +77,8 @@ enum FoodIcon: String, CaseIterable {
 }
 
 @Generable
-struct SymbolSuggestion {
-  @Guide(
-    description: """
-      Pick the icon that best represents this food visually.
-      - beef/ham/drumstick/fish: meats and proteins
-      - egg/eggFried: eggs
-      - milk: dairy, cream, butter
-      - amphora: cheese, yogurt, fermented dairy
-      - carrot/leafyGreen/salad/vegan: vegetables
-      - apple/banana/cherry/citrus/grape: fruits
-      - bean/nut: legumes, nuts, seeds
-      - sandwich/croissant: bread, bakery
-      - wheat: grains, rice, pasta, cereal
-      - coffee: coffee, tea, hot drinks
-      - beer/wine/bottleWine/martini/hop: alcoholic drinks
-      - cupSoda/glassWater: sodas, juice, water
-      - cake/cakeSlice/dessert/donut/cookie: desserts, baked sweets
-      - candy/candyCane/lollipop: candy, chocolate
-      - iceCreamBowl/iceCreamCone/popsicle: frozen treats
-      - pizza/hamburger: fast food
-      - popcorn: snacks
-      - soup/cookingPot: soups, stews, cooked dishes
-      - shell/snail: shellfish, escargot
-      - handPlatter: condiments, sauces
-      - barrel: spices, seasonings
-      - microwave/refrigerator: prepared/frozen meals
-      - chefHat/utensils/utensilsCrossed: generic food, unknown
-      - torus: bagels, donuts, ring-shaped foods
-      """
-  )
+struct IconSuggestion {
+  @Guide(description: "Best single icon for the food.")
   var icon: FoodIcon
 }
 
@@ -115,9 +87,8 @@ actor SymbolService {
 
   private let instructions = Instructions(
     """
-    You are a food icon classifier. Given a food name, pick the single best matching icon.
-    Focus on the primary ingredient or food type, not packaging or brand names.
-    When uncertain, prefer utensils as a safe default.
+    You are a food icon classifier. Pick the single best icon for the food.
+    Focus on the food itself, not packaging or brand.
     """
   )
 
@@ -134,16 +105,50 @@ actor SymbolService {
     do {
       print("Suggesting symbol for: \(foodName)")
       let session = LanguageModelSession(instructions: instructions)
+      let prompt = iconPrompt(for: foodName)
       let response = try await session.respond(
-        to: "Food: \(foodName)",
-        generating: SymbolSuggestion.self,
+        to: prompt,
+        generating: IconSuggestion.self,
         options: generationOptions
       )
-      print("Suggested icon for \(foodName): \(response.content.icon.rawValue)")
-      return response.content.icon.rawValue
+      let icon = response.content.icon.rawValue
+      print("Suggested icon for \(foodName): \(icon)")
+      return icon
     } catch {
       print("Failed to generate symbol: \(error)")
       return nil
     }
+  }
+
+  private func iconPrompt(for foodName: String) -> String {
+    """
+    Pick the best icon for the food item.
+    Food: \(foodName)
+
+    Glossary:
+    - amphora = cheese, yogurt, fermented dairy
+    - torus = bagels, donuts, ring-shaped foods
+    - hand-platter = condiments, sauces, dips
+    - barrel = spices, seasonings
+    - utensils = unknown or generic food
+    - utensils-crossed = shared meal, general cooking
+    - chef-hat = prepared dish, chef-made meal
+    - cooking-pot = stew, soup, cooked dish
+    - microwave = frozen or microwave meal
+    - refrigerator = refrigerated or chilled item
+    - cup-soda = soda, juice, soft drink
+    - glass-water = water or plain beverage
+    - hop = beer or hoppy drink
+    - drumstick = poultry
+    - leafy-green = leafy vegetables
+    - shell = shellfish
+    - snail = escargot
+
+    Examples:
+    Food: Greek yogurt -> icon: amphora
+    Food: Everything bagel -> icon: torus
+    Food: BBQ sauce -> icon: hand-platter
+    Food: Taco seasoning -> icon: barrel
+    """
   }
 }

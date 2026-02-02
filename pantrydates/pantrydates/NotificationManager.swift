@@ -25,7 +25,7 @@ struct NotificationManager {
 
   static func scheduleBackgroundTask() {
     let request = BGAppRefreshTaskRequest(identifier: backgroundTaskIdentifier)
-    request.earliestBeginDate = Date(timeIntervalSinceNow: 12 * 60 * 60)  // 12 hours
+    request.earliestBeginDate = Date(timeIntervalSinceNow: 2 * 60 * 60)  // 2 hours
 
     do {
       try BGTaskScheduler.shared.submit(request)

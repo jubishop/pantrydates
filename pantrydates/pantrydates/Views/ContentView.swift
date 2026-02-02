@@ -80,9 +80,8 @@ struct ContentView: View {
   private func itemRow(_ item: FoodItem) -> some View {
     NavigationLink(value: item) {
       HStack {
-        Image(systemName: item.symbolName)
+        FoodIconView(name: item.symbolName, size: 24)
           .foregroundStyle(item.flagged ? .orange : .secondary)
-          .frame(width: 24)
         VStack(alignment: .leading, spacing: 2) {
           Text(item.name)
           if !item.notes.isEmpty {

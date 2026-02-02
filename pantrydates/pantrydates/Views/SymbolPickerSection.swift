@@ -1,6 +1,5 @@
 // Copyright Justin Bishop, 2026
 
-import FoundationModels
 import SwiftUI
 
 struct SymbolPickerSection: View {
@@ -21,8 +20,7 @@ struct SymbolPickerSection: View {
           ProgressView()
             .frame(width: 32, height: 32)
         } else {
-          Image(systemName: symbolName)
-            .font(.system(size: 32))
+          FoodIconView(name: symbolName, size: 32)
             .foregroundStyle(.secondary)
         }
 
@@ -32,7 +30,7 @@ struct SymbolPickerSection: View {
           isExpanded.toggle()
         } label: {
           Label(
-            isExpanded ? "Hide Symbols" : "Choose Symbol",
+            isExpanded ? "Hide Icons" : "Choose Icon",
             systemImage: isExpanded ? "chevron.up" : "chevron.down"
           )
         }
@@ -43,38 +41,37 @@ struct SymbolPickerSection: View {
         Button {
           onSuggestSymbol()
         } label: {
-          Label("Suggest Symbol", systemImage: "sparkles")
+          Label("Suggest Icon", systemImage: "sparkles")
         }
         .disabled(
           isGeneratingSymbol || itemName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         )
 
         LazyVGrid(columns: columns, spacing: 12) {
-          ForEach(FoodSymbol.allCases, id: \.self) { foodSymbol in
-            let sfSymbol = foodSymbol.rawValue
+          ForEach(FoodIcon.allCases, id: \.self) { icon in
+            let iconName = icon.rawValue
             Button {
-              symbolName = sfSymbol
+              symbolName = iconName
               userDidSelectSymbol = true
               isExpanded = false
             } label: {
-              Image(systemName: sfSymbol)
-                .font(.system(size: 24))
+              FoodIconView(name: iconName, size: 24)
                 .frame(width: 44, height: 44)
                 .background(
-                  symbolName == sfSymbol
+                  symbolName == iconName
                     ? Color.accentColor.opacity(0.2)
                     : Color.clear
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             }
             .buttonStyle(.plain)
-            .foregroundStyle(symbolName == sfSymbol ? .primary : .secondary)
+            .foregroundStyle(symbolName == iconName ? .primary : .secondary)
           }
         }
         .padding(.vertical, 8)
       }
     } header: {
-      Label("Symbol", systemImage: "photo")
+      Label("Icon", systemImage: "photo")
     }
   }
 }

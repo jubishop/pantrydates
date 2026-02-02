@@ -66,6 +66,11 @@ struct AppDatabase {
       }
     }
 
+    // Migrate from SF Symbols to Lucide icons
+    migrator.registerMigration("v9") { db in
+      try db.execute(sql: "UPDATE foodItem SET symbolName = 'utensils'")
+    }
+
     return migrator
   }
 }

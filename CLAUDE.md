@@ -10,14 +10,23 @@ This is an Xcode project. Open `pantrydates/pantrydates.xcodeproj` in Xcode to b
 
 SwiftUI iOS 26+ app using GRDB.swift for SQLite persistence.
 
+**Folder structure:**
+- `Views/` - All SwiftUI views
+- `Components/` - Reusable UI components
+- `Database/` - Database and model files
+- Root - Services and app entry point
+
 **Key files:**
-- `FoodItem.swift` - Model conforming to GRDB's `FetchableRecord` and `MutablePersistableRecord`
-- `Database.swift` - `AppDatabase` struct containing migrations and all database operations
-- `ContentView.swift` - Main list view with filtering and swipe actions
-- `ItemDetailView.swift` - Edit view for individual items
-- `AddItemView.swift` - Sheet for creating new items
+- `Database/FoodItem.swift` - Model conforming to GRDB's `FetchableRecord` and `MutablePersistableRecord`
+- `Database/Database.swift` - `AppDatabase` struct containing migrations and all database operations
+- `Views/ContentView.swift` - Main list view with filtering and swipe actions
+- `Views/ItemDetailView.swift` - Edit view for individual items
+- `Views/AddItemView.swift` - Sheet for creating new items
+- `Views/SymbolPickerSection.swift` - Icon picker UI component
+- `Views/FoodIconView.swift` - Renders Lucide icons from asset catalog
+- `Components/ItemFormFields.swift` - Shared form fields for add/edit views
 - `NotificationManager.swift` - Background task scheduling and local notification delivery
-- `SymbolService.swift` - Apple Intelligence integration for SF Symbol suggestions
+- `SymbolService.swift` - Apple Intelligence integration for Lucide icon suggestions
 
 **Data flow:**
 - `pantrydatesApp` creates `AppDatabase` and passes it to views
@@ -37,6 +46,7 @@ Migrations are in `Database.swift` under the `migrator` property. Add new migrat
 - v6: Rename table from `pantryItem` to `foodItem`
 - v7: Add `refrigerated` boolean
 - v8: Add `symbolName` text field (defaults to `fork.knife`)
+- v9: Migrate all symbolName values to `utensils` (Lucide icon migration)
 
 ## Adding New Fields
 
@@ -65,18 +75,26 @@ Each pantry item can have an optional `notificationDate` for reminders. The syst
 
 The Info.plist is at the project root level (not inside the pantrydates source folder) to avoid conflicts with Xcode's file synchronization.
 
-## Symbol System
+## Icon System
 
-Each food item has an SF Symbol for visual identification, suggested by Apple Intelligence.
+Each food item has a Lucide icon for visual identification, suggested by Apple Intelligence.
 
 **How it works:**
-- `symbolName` (text) - SF Symbol name for the item, defaults to `fork.knife`
+- `symbolName` (text) - Lucide icon name for the item, defaults to `utensils`
+- Icons are stored in `Assets.xcassets/FoodIcons/` as template-rendered SVGs (56 icons)
+- `FoodIcon` enum in `SymbolService.swift` lists all available icons
+- `FoodCategory` enum maps food categories to icon names for AI suggestions
 - Uses the Foundation Models framework with `@Generable` for structured output
-- Symbols are auto-generated when creating new items or changing an item's name
-- User can manually regenerate via "Suggest Symbol" button in ItemDetailView
+- Icons are auto-generated when creating new items or changing an item's name
+- User can manually select via icon picker or regenerate via "Suggest Icon" button
+
+**Key types:**
+- `FoodIcon` - All available Lucide icon names (rawValue = asset name like "ice-cream-cone")
+- `FoodCategory` - AI classification categories mapped to icon names
+- `FoodIconView` - SwiftUI view that renders icons from the asset catalog
 
 **Fallback behavior:**
-- If AI generation fails, the existing symbol is preserved
+- If AI generation fails, the existing icon is preserved
 
 ## Error Handling
 
@@ -87,5 +105,9 @@ Never force unwrap optionals using `!`. Use `guard let`, `if let`, or nil-coales
 ## Code Style
 
 All lines must stay under 100 characters, including comments.
+
+Every SwiftUI view should be in its own file in `Views/`, named after the view (e.g., `Views/FoodIconView.swift`). Reusable UI components go in `Components/`.
+
+Any struct, class, or enum used by multiple files should be in its own file. Otherwise, it's acceptable to keep it in the same file as its sole consumer.
 
 After making any code changes, always run `swift-format -i` on the modified files.

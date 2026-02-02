@@ -25,7 +25,7 @@ struct FoodItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePersis
     notificationDate: Date? = nil,
     notificationSent: Bool = false,
     refrigerated: Bool = false,
-    symbolName: String = "fork.knife"
+    symbolName: String = "utensils"
   ) {
     self.id = id
     self.name = name

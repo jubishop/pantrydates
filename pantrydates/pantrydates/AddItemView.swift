@@ -11,6 +11,7 @@ struct AddItemView: View {
   @State private var userDidSelectSymbol = false
   @State private var isGeneratingSymbol = false
   @State private var lastGeneratedName = ""
+  @FocusState private var isNameFocused: Bool
 
   var body: some View {
     NavigationStack {
@@ -22,7 +23,14 @@ struct AddItemView: View {
           isGeneratingSymbol: isGeneratingSymbol,
           onSuggestSymbol: suggestSymbol
         )
-        ItemFormFields(item: $item, autoFocusName: true, onNameFocusLost: handleNameFocusLost)
+        ItemFormFields(item: $item) {
+          TextField("Item Name", text: $item.name)
+            .focused($isNameFocused)
+            .onAppear { isNameFocused = true }
+            .onChange(of: isNameFocused) { _, focused in
+              if !focused { handleNameFocusLost() }
+            }
+        }
       }
       .navigationTitle("New Item")
       .navigationBarTitleDisplayMode(.inline)

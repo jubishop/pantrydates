@@ -2,26 +2,17 @@
 
 import SwiftUI
 
-struct ItemFormFields: View {
+struct ItemFormFields<NameField: View>: View {
   @Binding var item: FoodItem
-  var autoFocusName: Bool = false
-  var onNameFocusLost: (() -> Void)?
+  let nameField: () -> NameField
 
-  @FocusState private var isNameFocused: Bool
+  init(item: Binding<FoodItem>, @ViewBuilder nameField: @escaping () -> NameField) {
+    self._item = item
+    self.nameField = nameField
+  }
 
   var body: some View {
-    TextField("Item Name", text: $item.name)
-      .focused($isNameFocused)
-      .onAppear {
-        if autoFocusName {
-          isNameFocused = true
-        }
-      }
-      .onChange(of: isNameFocused) { _, focused in
-        if !focused {
-          onNameFocusLost?()
-        }
-      }
+    nameField()
     TextField("Notes", text: $item.notes)
     DatePicker("Expiration Date", selection: $item.expirationDate, displayedComponents: .date)
     Toggle("Flagged", isOn: $item.flagged)
@@ -47,6 +38,14 @@ struct ItemFormFields: View {
       }
     } header: {
       Label("Notification", systemImage: "bell")
+    }
+  }
+}
+
+extension ItemFormFields where NameField == TextField<Text> {
+  init(item: Binding<FoodItem>) {
+    self.init(item: item) {
+      TextField("Item Name", text: item.name)
     }
   }
 }

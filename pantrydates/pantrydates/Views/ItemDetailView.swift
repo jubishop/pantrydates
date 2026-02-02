@@ -9,7 +9,6 @@ struct ItemDetailView: View {
 
   @State private var item: FoodItem
   @State private var originalName: String
-  @State private var originalNotificationDate: Date?
   @State private var showDeleteConfirmation = false
   @State private var isGeneratingSymbol = false
   @State private var userDidSelectSymbol = false
@@ -18,7 +17,6 @@ struct ItemDetailView: View {
     self.database = database
     _item = State(initialValue: item)
     _originalName = State(initialValue: item.name)
-    _originalNotificationDate = State(initialValue: item.notificationDate)
   }
 
   var body: some View {
@@ -79,15 +77,10 @@ struct ItemDetailView: View {
     guard !trimmedName.isEmpty else { return }
 
     let nameChanged = trimmedName != originalName
-    let notificationDateChanged = item.notificationDate != originalNotificationDate
 
     var updatedItem = item
     updatedItem.name = trimmedName
     updatedItem.notes = item.notes.trimmingCharacters(in: .whitespacesAndNewlines)
-
-    if notificationDateChanged {
-      updatedItem.notificationSent = false
-    }
 
     do {
       let id = try database.saveItem(&updatedItem)

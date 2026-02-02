@@ -71,6 +71,14 @@ struct AppDatabase {
       try db.execute(sql: "UPDATE foodItem SET symbolName = 'utensils'")
     }
 
+    // Remove notification columns
+    migrator.registerMigration("v10") { db in
+      try db.alter(table: "foodItem") { t in
+        t.drop(column: "notificationDate")
+        t.drop(column: "notificationSent")
+      }
+    }
+
     return migrator
   }
 }
@@ -140,25 +148,6 @@ extension AppDatabase {
     try writer.write { db in
       if var item = try FoodItem.fetchOne(db, key: id) {
         item.flagged.toggle()
-        try item.update(db)
-      }
-    }
-  }
-
-  func fetchItemsPendingNotification() throws -> [FoodItem] {
-    try writer.read { db in
-      try FoodItem
-        .filter(Column("notificationDate") != nil)
-        .filter(Column("notificationSent") == false)
-        .filter(Column("notificationDate") <= Date())
-        .fetchAll(db)
-    }
-  }
-
-  func markNotificationSent(id: Int64) throws {
-    try writer.write { db in
-      if var item = try FoodItem.fetchOne(db, key: id) {
-        item.notificationSent = true
         try item.update(db)
       }
     }

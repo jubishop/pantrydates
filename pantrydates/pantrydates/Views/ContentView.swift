@@ -91,28 +91,13 @@ struct ContentView: View {
           }
         }
         Spacer()
-        VStack(alignment: .trailing, spacing: 2) {
-          let isExpired =
-            Calendar.current.isDateInToday(item.expirationDate)
-            || item.expirationDate < Calendar.current.startOfDay(for: Date())
-          let isPast = item.expirationDate < Calendar.current.startOfDay(for: Date())
-          HStack(spacing: 4) {
-            Image(systemName: "calendar")
-              .font(.caption2)
-            Text(dateFormatter.string(from: item.expirationDate))
-              .fontWeight(isPast ? .bold : .regular)
-          }
-          .foregroundStyle(isExpired ? .red : .secondary)
-          if let notificationDate = item.notificationDate {
-            HStack(spacing: 4) {
-              Image(systemName: "bell")
-                .font(.caption2)
-              Text(dateFormatter.string(from: notificationDate))
-            }
-            .foregroundStyle(item.notificationSent ? .green : .blue)
-            .font(.caption)
-          }
+        HStack(spacing: 4) {
+          Image(systemName: "calendar")
+            .font(.caption2)
+          Text(dateFormatter.string(from: item.expirationDate))
+            .fontWeight(isPastExpired(item) ? .bold : .regular)
         }
+        .foregroundStyle(isExpired(item) ? .red : .secondary)
       }
     }
     .swipeActions(edge: .leading) {
@@ -147,5 +132,13 @@ struct ContentView: View {
     } catch {
       print("Failed to toggle flagged: \(error)")
     }
+  }
+
+  private func isExpired(_ item: FoodItem) -> Bool {
+    isPastExpired(item) || Calendar.current.isDateInToday(item.expirationDate)
+  }
+
+  private func isPastExpired(_ item: FoodItem) -> Bool {
+    item.expirationDate < Calendar.current.startOfDay(for: Date())
   }
 }

@@ -11,8 +11,6 @@ struct FoodItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePersis
   var notes: String
   var expirationDate: Date
   var flagged: Bool
-  var notificationDate: Date?
-  var notificationSent: Bool
   var refrigerated: Bool
   var symbolName: String
 
@@ -22,8 +20,6 @@ struct FoodItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePersis
     notes: String = "",
     expirationDate: Date = Date(),
     flagged: Bool = false,
-    notificationDate: Date? = nil,
-    notificationSent: Bool = false,
     refrigerated: Bool = false,
     symbolName: String = "utensils"
   ) {
@@ -32,8 +28,6 @@ struct FoodItem: Codable, Identifiable, Hashable, FetchableRecord, MutablePersis
     self.notes = notes
     self.expirationDate = expirationDate
     self.flagged = flagged
-    self.notificationDate = notificationDate
-    self.notificationSent = notificationSent
     self.refrigerated = refrigerated
     self.symbolName = symbolName
   }

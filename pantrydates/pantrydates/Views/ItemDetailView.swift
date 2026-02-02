@@ -12,6 +12,7 @@ struct ItemDetailView: View {
   @State private var showDeleteConfirmation = false
   @State private var isGeneratingSymbol = false
   @State private var userDidSelectSymbol = false
+  @State private var wasDeleted = false
 
   init(database: AppDatabase, item: FoodItem) {
     self.database = database
@@ -73,6 +74,8 @@ struct ItemDetailView: View {
   }
 
   private func saveChanges() {
+    guard !wasDeleted else { return }
+
     let trimmedName = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !trimmedName.isEmpty else { return }
 
@@ -101,6 +104,7 @@ struct ItemDetailView: View {
     guard let id = item.id else { fatalError("Editing unsaved item?") }
     do {
       try database.deleteItem(id: id)
+      wasDeleted = true
       dismiss()
     } catch {
       print("Failed to delete item: \(error)")

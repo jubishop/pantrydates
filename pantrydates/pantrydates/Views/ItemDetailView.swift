@@ -22,7 +22,7 @@ struct ItemDetailView: View {
 
   var body: some View {
     Form {
-      SymbolPickerSection(
+      SymbolPicker(
         symbolName: $item.symbolName,
         userDidSelectSymbol: $userDidSelectSymbol,
         itemName: item.name,

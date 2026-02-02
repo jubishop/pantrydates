@@ -22,7 +22,7 @@ SwiftUI iOS 26+ app using GRDB.swift for SQLite persistence.
 - `Views/ContentView.swift` - Main list view with filtering and swipe actions
 - `Views/ItemDetailView.swift` - Edit view for individual items
 - `Views/AddItemView.swift` - Sheet for creating new items
-- `Views/SymbolPickerSection.swift` - Icon picker UI component
+- `Views/SymbolPicker.swift` - Icon picker UI component
 - `Views/FoodIconView.swift` - Renders Lucide icons from asset catalog
 - `Components/ItemFormFields.swift` - Shared form fields for add/edit views
 - `NotificationManager.swift` - Background task scheduling and local notification delivery

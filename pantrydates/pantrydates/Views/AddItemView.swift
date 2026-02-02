@@ -16,7 +16,7 @@ struct AddItemView: View {
   var body: some View {
     NavigationStack {
       Form {
-        SymbolPickerSection(
+        SymbolPicker(
           symbolName: $item.symbolName,
           userDidSelectSymbol: $userDidSelectSymbol,
           itemName: item.name,

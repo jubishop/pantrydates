@@ -20,6 +20,7 @@ struct AddItemView: View {
           symbolName: $item.symbolName,
           userDidSelectSymbol: $userDidSelectSymbol,
           itemName: item.name,
+          flagged: item.flagged,
           isGeneratingSymbol: isGeneratingSymbol,
           onSuggestSymbol: suggestSymbol
         )

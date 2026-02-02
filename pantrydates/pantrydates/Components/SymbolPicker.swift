@@ -6,6 +6,7 @@ struct SymbolPicker: View {
   @Binding var symbolName: String
   @Binding var userDidSelectSymbol: Bool
   let itemName: String
+  let flagged: Bool
   let isGeneratingSymbol: Bool
   let onSuggestSymbol: () -> Void
 
@@ -20,7 +21,7 @@ struct SymbolPicker: View {
           .frame(width: 32, height: 32)
       } else {
         FoodIconView(name: symbolName, size: 32)
-          .foregroundStyle(.secondary)
+          .foregroundStyle(flagged ? .orange : .secondary)
           .padding(.horizontal, 16)
 
         Button {

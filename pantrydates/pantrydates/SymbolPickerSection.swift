@@ -46,7 +46,8 @@ struct SymbolPickerSection: View {
           Label("Suggest Symbol", systemImage: "sparkles")
         }
         .disabled(
-          isGeneratingSymbol || itemName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+          isGeneratingSymbol || itemName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        )
 
         LazyVGrid(columns: columns, spacing: 12) {
           ForEach(FoodSymbol.allCases, id: \.self) { foodSymbol in

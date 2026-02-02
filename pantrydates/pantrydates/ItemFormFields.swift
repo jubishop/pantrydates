@@ -5,6 +5,7 @@ import SwiftUI
 struct ItemFormFields: View {
   @Binding var item: FoodItem
   var autoFocusName: Bool = false
+  var onNameFocusLost: (() -> Void)?
 
   @FocusState private var isNameFocused: Bool
 
@@ -14,6 +15,11 @@ struct ItemFormFields: View {
       .onAppear {
         if autoFocusName {
           isNameFocused = true
+        }
+      }
+      .onChange(of: isNameFocused) { _, focused in
+        if !focused {
+          onNameFocusLost?()
         }
       }
     TextField("Notes", text: $item.notes)

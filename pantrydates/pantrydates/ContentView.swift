@@ -93,7 +93,8 @@ struct ContentView: View {
         }
         Spacer()
         VStack(alignment: .trailing, spacing: 2) {
-          let isExpired = Calendar.current.isDateInToday(item.expirationDate)
+          let isExpired =
+            Calendar.current.isDateInToday(item.expirationDate)
             || item.expirationDate < Calendar.current.startOfDay(for: Date())
           let isPast = item.expirationDate < Calendar.current.startOfDay(for: Date())
           HStack(spacing: 4) {

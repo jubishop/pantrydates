@@ -83,3 +83,9 @@ Each food item has an SF Symbol for visual identification, suggested by Apple In
 Use `fatalError()` for scenarios that should never logically happen. If the code reaches a state that violates invariants or represents a programming error, fail loudly rather than silently. This makes bugs immediately visible during development instead of causing subtle issues later.
 
 Never force unwrap optionals using `!`. Use `guard let`, `if let`, or nil-coalescing (`??`) instead. If a value truly must exist, use `guard let value = optional else { fatalError("reason") }` to fail explicitly with context.
+
+## Code Style
+
+All lines must stay under 100 characters, including comments.
+
+After making any code changes, always run `swift-format -i` on the modified files.

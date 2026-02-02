@@ -10,6 +10,7 @@ struct AddItemView: View {
   @State private var item = FoodItem()
   @State private var userDidSelectSymbol = false
   @State private var isGeneratingSymbol = false
+  @State private var lastGeneratedName = ""
 
   var body: some View {
     NavigationStack {
@@ -21,7 +22,7 @@ struct AddItemView: View {
           isGeneratingSymbol: isGeneratingSymbol,
           onSuggestSymbol: suggestSymbol
         )
-        ItemFormFields(item: $item, autoFocusName: true)
+        ItemFormFields(item: $item, autoFocusName: true, onNameFocusLost: handleNameFocusLost)
       }
       .navigationTitle("New Item")
       .navigationBarTitleDisplayMode(.inline)
@@ -42,10 +43,28 @@ struct AddItemView: View {
     }
   }
 
+  private func handleNameFocusLost() {
+    let trimmedName = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !userDidSelectSymbol,
+      !trimmedName.isEmpty,
+      trimmedName != lastGeneratedName
+    else { return }
+
+    lastGeneratedName = trimmedName
+    isGeneratingSymbol = true
+    Task {
+      if let symbol = await SymbolService.shared.suggestSymbol(for: trimmedName) {
+        item.symbolName = symbol
+      }
+      isGeneratingSymbol = false
+    }
+  }
+
   private func suggestSymbol() {
     let name = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !name.isEmpty else { return }
 
+    lastGeneratedName = name
     isGeneratingSymbol = true
     Task {
       if let symbol = await SymbolService.shared.suggestSymbol(for: name) {
@@ -62,8 +81,8 @@ struct AddItemView: View {
     newItem.notes = item.notes.trimmingCharacters(in: .whitespacesAndNewlines)
     do {
       let id = try database.saveItem(&newItem)
-      // Auto-generate symbol in background only if user never selected one
-      if !userDidSelectSymbol {
+      // Auto-generate symbol if not manually selected and name not yet processed
+      if !userDidSelectSymbol && newItem.name != lastGeneratedName {
         let name = newItem.name
         Task {
           if let symbol = await SymbolService.shared.suggestSymbol(for: name) {

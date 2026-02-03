@@ -97,7 +97,7 @@ struct ContentView: View {
           Text(dateFormatter.string(from: item.expirationDate))
             .fontWeight(isPastExpired(item) ? .bold : .regular)
         }
-        .foregroundStyle(isExpired(item) ? .red : .secondary)
+        .foregroundStyle(dateColor(for: item))
       }
     }
     .swipeActions(edge: .leading) {
@@ -140,5 +140,25 @@ struct ContentView: View {
 
   private func isPastExpired(_ item: FoodItem) -> Bool {
     item.expirationDate < Calendar.current.startOfDay(for: Date())
+  }
+
+  private func isExpiringSoon(_ item: FoodItem) -> Bool {
+    guard !isExpired(item) else { return false }
+    let calendar = Calendar.current
+    let today = calendar.startOfDay(for: Date())
+    guard let oneWeekFromNow = calendar.date(byAdding: .day, value: 7, to: today) else {
+      return false
+    }
+    return item.expirationDate < oneWeekFromNow
+  }
+
+  private func dateColor(for item: FoodItem) -> Color {
+    if isExpired(item) {
+      return .red
+    } else if isExpiringSoon(item) {
+      return .yellow
+    } else {
+      return .secondary
+    }
   }
 }

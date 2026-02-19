@@ -79,6 +79,14 @@ struct AppDatabase {
       }
     }
 
+    migrator.registerMigration("v11") { db in
+      try db.create(table: "finishedItem") { t in
+        t.autoIncrementedPrimaryKey("id")
+        t.column("name", .text).notNull()
+        t.column("finishedDate", .datetime).notNull()
+      }
+    }
+
     return migrator
   }
 }
@@ -168,4 +176,37 @@ extension AppDatabase {
       }
     }
   }
+
+  func finishItem(_ item: FoodItem) throws {
+    try writer.write { db in
+      var finished = FinishedItem(
+        name: item.name,
+        finishedDate: Date()
+      )
+      try finished.insert(db)
+      _ = try item.delete(db)
+    }
+  }
+}
+
+// MARK: - Finished Items
+
+extension AppDatabase {
+  func fetchAllFinishedItems() throws -> [FinishedItem] {
+    try writer.read { db in
+      try FinishedItem
+        .order(Column("finishedDate").desc)
+        .fetchAll(db)
+    }
+  }
+
+  func fetchDistinctFinishedNames() throws -> [String] {
+    try writer.read { db in
+      try String.fetchAll(
+        db,
+        sql: "SELECT DISTINCT name FROM finishedItem ORDER BY name"
+      )
+    }
+  }
+
 }

@@ -109,11 +109,25 @@ struct ContentView: View {
       .tint(.orange)
     }
     .swipeActions(edge: .trailing) {
+      Button {
+        finishItem(item)
+      } label: {
+        Image(systemName: "checkmark.circle")
+      }
+      .tint(.green)
       Button(role: .destructive) {
         deleteItem(item)
       } label: {
         Image(systemName: "trash")
       }
+    }
+  }
+
+  private func finishItem(_ item: FoodItem) {
+    do {
+      try database.finishItem(item)
+    } catch {
+      print("Failed to finish item: \(error)")
     }
   }
 

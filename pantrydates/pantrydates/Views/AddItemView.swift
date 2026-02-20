@@ -6,13 +6,34 @@ struct AddItemView: View {
   @Environment(\.dismiss) private var dismiss
 
   let database: AppDatabase
+  let initialItem: FoodItem?
 
-  @State private var item = FoodItem()
-  @State private var userDidSelectSymbol = false
+  @State private var item: FoodItem
+  @State private var userDidSelectSymbol: Bool
   @State private var isGeneratingSymbol = false
   @State private var lastGeneratedName = ""
   @State private var finishedNames: [String] = []
   @FocusState private var isNameFocused: Bool
+
+  init(database: AppDatabase, initialItem: FoodItem? = nil) {
+    self.database = database
+    self.initialItem = initialItem
+    if let initial = initialItem {
+      _item = State(
+        initialValue: FoodItem(
+          name: initial.name,
+          notes: initial.notes,
+          flagged: initial.flagged,
+          refrigerated: initial.refrigerated,
+          symbolName: initial.symbolName
+        )
+      )
+      _userDidSelectSymbol = State(initialValue: true)
+    } else {
+      _item = State(initialValue: FoodItem())
+      _userDidSelectSymbol = State(initialValue: false)
+    }
+  }
 
   var body: some View {
     NavigationStack {

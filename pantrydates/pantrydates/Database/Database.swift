@@ -234,4 +234,20 @@ extension AppDatabase {
     }
   }
 
+  func deleteFinishedItem(_ item: FinishedItem) throws {
+    try writer.write { db in
+      _ = try item.delete(db)
+    }
+  }
+
+  func observeAllFinishedItems()
+    -> AsyncValueObservation<[FinishedItem]>
+  {
+    let observation = ValueObservation.tracking { db in
+      try FinishedItem
+        .order(Column("finishedDate").desc)
+        .fetchAll(db)
+    }
+    return observation.values(in: writer)
+  }
 }

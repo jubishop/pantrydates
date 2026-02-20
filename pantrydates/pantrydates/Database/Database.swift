@@ -87,6 +87,23 @@ struct AppDatabase {
       }
     }
 
+    migrator.registerMigration("v12") { db in
+      try db.alter(table: "finishedItem") { t in
+        t.add(column: "notes", .text).notNull().defaults(to: "")
+        t.add(column: "flagged", .boolean).notNull().defaults(to: false)
+        t.add(column: "refrigerated", .boolean)
+          .notNull().defaults(to: false)
+        t.add(column: "symbolName", .text)
+          .notNull().defaults(to: "utensils")
+      }
+      try db.execute(
+        sql: """
+          UPDATE finishedItem
+          SET refrigerated = 1, flagged = 1
+          """
+      )
+    }
+
     return migrator
   }
 }
@@ -181,7 +198,11 @@ extension AppDatabase {
     try writer.write { db in
       var finished = FinishedItem(
         name: item.name,
-        finishedDate: Date()
+        notes: item.notes,
+        finishedDate: Date(),
+        flagged: item.flagged,
+        refrigerated: item.refrigerated,
+        symbolName: item.symbolName
       )
       try finished.insert(db)
       _ = try item.delete(db)

@@ -11,6 +11,7 @@ struct AddItemView: View {
   @State private var userDidSelectSymbol = false
   @State private var isGeneratingSymbol = false
   @State private var lastGeneratedName = ""
+  @State private var finishedNames: [String] = []
   @FocusState private var isNameFocused: Bool
 
   var body: some View {
@@ -31,8 +32,28 @@ struct AddItemView: View {
             .onChange(of: isNameFocused) { _, focused in
               if !focused { handleNameFocusLost() }
             }
+            .toolbar {
+              ToolbarItemGroup(placement: .keyboard) {
+                if !filteredSuggestions.isEmpty {
+                  ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                      ForEach(filteredSuggestions, id: \.self) { name in
+                        Button(name) {
+                          item.name = name
+                          isNameFocused = false
+                        }
+                        .font(.callout)
+                        .buttonStyle(.bordered)
+                        .buttonBorderShape(.capsule)
+                      }
+                    }
+                  }
+                }
+              }
+            }
         }
       }
+      .onAppear { loadFinishedNames() }
       .navigationTitle("New Item")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
@@ -49,6 +70,24 @@ struct AddItemView: View {
           .disabled(item.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
       }
+    }
+  }
+
+  private var filteredSuggestions: [String] {
+    let query = item.name.lowercased()
+    let results = finishedNames.filter {
+      $0.lowercased().contains(query)
+    }
+    print("[Suggestions] Query: '\(query)', isNameFocused: \(isNameFocused), matches: \(results)")
+    return results
+  }
+
+  private func loadFinishedNames() {
+    do {
+      finishedNames = try database.fetchDistinctFinishedNames()
+      print("[Suggestions] Loaded \(finishedNames.count) finished names: \(finishedNames)")
+    } catch {
+      print("[Suggestions] Failed to load finished names: \(error)")
     }
   }
 

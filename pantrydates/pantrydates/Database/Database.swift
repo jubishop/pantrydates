@@ -204,7 +204,11 @@ extension AppDatabase {
     try writer.read { db in
       try String.fetchAll(
         db,
-        sql: "SELECT DISTINCT name FROM finishedItem ORDER BY name"
+        sql: """
+          SELECT name FROM finishedItem
+          GROUP BY name
+          ORDER BY MAX(finishedDate) DESC
+          """
       )
     }
   }

@@ -9,17 +9,31 @@ struct CurrentItemsView: View {
   @State private var items: [FoodItem] = []
   @State private var showingAddSheet = false
   @State private var showFlaggedOnly = false
+  @State private var filterText = ""
 
   private var pantryItems: [FoodItem] {
-    let filtered =
-      showFlaggedOnly ? items.filter { $0.flagged } : items
-    return filtered.filter { !$0.refrigerated }
+    filteredItems(refrigerated: false)
   }
 
   private var fridgeItems: [FoodItem] {
-    let filtered =
+    filteredItems(refrigerated: true)
+  }
+
+  private func filteredItems(
+    refrigerated: Bool
+  ) -> [FoodItem] {
+    var result =
       showFlaggedOnly ? items.filter { $0.flagged } : items
-    return filtered.filter { $0.refrigerated }
+    if !filterText.isEmpty {
+      result = result.filter {
+        $0.name.localizedCaseInsensitiveContains(
+          filterText
+        )
+      }
+    }
+    return result.filter {
+      $0.refrigerated == refrigerated
+    }
   }
 
   var body: some View {
@@ -35,6 +49,9 @@ struct CurrentItemsView: View {
             itemRow(item)
           }
         }
+      }
+      .safeAreaInset(edge: .top) {
+        FilterField(text: $filterText)
       }
       .task {
         do {

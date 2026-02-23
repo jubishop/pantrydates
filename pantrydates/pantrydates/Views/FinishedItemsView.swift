@@ -8,11 +8,23 @@ struct FinishedItemsView: View {
 
   @State private var finishedItems: [FinishedItem] = []
   @State private var itemToReAdd: FinishedItem?
+  @State private var filterText = ""
+
+  private var filteredItems: [FinishedItem] {
+    if filterText.isEmpty {
+      return finishedItems
+    }
+    return finishedItems.filter {
+      $0.name.localizedCaseInsensitiveContains(
+        filterText
+      )
+    }
+  }
 
   var body: some View {
     NavigationStack {
       List {
-        ForEach(finishedItems) { item in
+        ForEach(filteredItems) { item in
           FoodItemRow(
             symbolName: item.symbolName,
             flagged: item.flagged,
@@ -38,6 +50,9 @@ struct FinishedItemsView: View {
             .tint(.blue)
           }
         }
+      }
+      .safeAreaInset(edge: .top) {
+        FilterField(text: $filterText)
       }
       .task {
         do {

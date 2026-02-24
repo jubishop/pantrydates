@@ -6,33 +6,31 @@ import SwiftUI
 struct CurrentItemsView: View {
   let database: AppDatabase
 
-  @State private var items: [FoodItem] = []
+  @State private var itemInfos: [FoodItemInfo] = []
   @State private var showingAddSheet = false
   @State private var showFlaggedOnly = false
   @State private var filterText = ""
 
-  private var pantryItems: [FoodItem] {
-    filteredItems(refrigerated: false)
+  private var pantryInfos: [FoodItemInfo] {
+    filteredInfos(refrigerated: false)
   }
 
-  private var fridgeItems: [FoodItem] {
-    filteredItems(refrigerated: true)
+  private var fridgeInfos: [FoodItemInfo] {
+    filteredInfos(refrigerated: true)
   }
 
-  private func filteredItems(
+  private func filteredInfos(
     refrigerated: Bool
-  ) -> [FoodItem] {
+  ) -> [FoodItemInfo] {
     var result =
-      showFlaggedOnly ? items.filter { $0.flagged } : items
+      showFlaggedOnly ? itemInfos.filter { $0.foodItem.flagged } : itemInfos
     if !filterText.isEmpty {
       result = result.filter {
-        $0.name.localizedCaseInsensitiveContains(
-          filterText
-        )
+        $0.foodItem.name.localizedCaseInsensitiveContains(filterText)
       }
     }
     return result.filter {
-      $0.refrigerated == refrigerated
+      $0.foodItem.refrigerated == refrigerated
     }
   }
 
@@ -40,13 +38,13 @@ struct CurrentItemsView: View {
     NavigationStack {
       List {
         Section("Pantry") {
-          ForEach(pantryItems) { item in
-            itemRow(item)
+          ForEach(pantryInfos) { info in
+            itemRow(info)
           }
         }
         Section("Fridge") {
-          ForEach(fridgeItems) { item in
-            itemRow(item)
+          ForEach(fridgeInfos) { info in
+            itemRow(info)
           }
         }
       }
@@ -55,18 +53,18 @@ struct CurrentItemsView: View {
       }
       .task {
         do {
-          for try await updatedItems
-            in database.observeAllItems()
+          for try await updatedInfos
+            in database.observeAllItemInfos()
           {
-            items = updatedItems
+            itemInfos = updatedInfos
           }
         } catch {
           print("Failed to observe items: \(error)")
         }
       }
       .navigationTitle("Food")
-      .navigationDestination(for: FoodItem.self) { item in
-        ItemDetailView(database: database, item: item)
+      .navigationDestination(for: FoodItemInfo.self) { info in
+        ItemDetailView(database: database, info: info)
       }
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
@@ -95,24 +93,24 @@ struct CurrentItemsView: View {
   }
 
   @ViewBuilder
-  private func itemRow(_ item: FoodItem) -> some View {
-    NavigationLink(value: item) {
+  private func itemRow(_ info: FoodItemInfo) -> some View {
+    NavigationLink(value: info) {
       FoodItemRow(
-        symbolName: item.symbolName,
-        flagged: item.flagged,
-        name: item.name,
-        notes: item.notes,
-        date: item.expirationDate,
-        dateColor: dateColor(for: item),
-        dateBold: isPastExpired(item)
+        symbolName: info.foodItem.symbolName,
+        flagged: info.foodItem.flagged,
+        name: info.foodItem.name,
+        notes: info.foodItem.notes,
+        date: info.mostImminentDate ?? Date(),
+        dateColor: dateColor(for: info),
+        dateBold: isPastExpired(info)
       )
     }
     .swipeActions(edge: .leading) {
       Button {
-        toggleFlagged(item: item)
+        toggleFlagged(info: info)
       } label: {
         Image(
-          systemName: item.flagged
+          systemName: info.foodItem.flagged
             ? "flag.slash" : "flag"
         )
       }
@@ -120,22 +118,22 @@ struct CurrentItemsView: View {
     }
     .swipeActions(edge: .trailing) {
       Button {
-        finishItem(item)
+        finishItemDate(info)
       } label: {
         Image(systemName: "checkmark.circle")
       }
       .tint(.green)
       Button(role: .destructive) {
-        deleteItem(item)
+        deleteItem(info.foodItem)
       } label: {
         Image(systemName: "trash")
       }
     }
   }
 
-  private func finishItem(_ item: FoodItem) {
+  private func finishItemDate(_ info: FoodItemInfo) {
     do {
-      try database.finishItem(item)
+      try database.finishItemDate(info)
     } catch {
       print("Failed to finish item: \(error)")
     }
@@ -149,8 +147,8 @@ struct CurrentItemsView: View {
     }
   }
 
-  private func toggleFlagged(item: FoodItem) {
-    guard let id = item.id else { return }
+  private func toggleFlagged(info: FoodItemInfo) {
+    guard let id = info.id else { return }
     do {
       try database.toggleFlagged(id: id)
     } catch {
@@ -158,18 +156,18 @@ struct CurrentItemsView: View {
     }
   }
 
-  private func isExpired(_ item: FoodItem) -> Bool {
-    isPastExpired(item)
-      || Calendar.current.isDateInToday(item.expirationDate)
+  private func isExpired(_ info: FoodItemInfo) -> Bool {
+    guard let date = info.mostImminentDate else { return false }
+    return isPastExpired(info) || Calendar.current.isDateInToday(date)
   }
 
-  private func isPastExpired(_ item: FoodItem) -> Bool {
-    item.expirationDate
-      < Calendar.current.startOfDay(for: Date())
+  private func isPastExpired(_ info: FoodItemInfo) -> Bool {
+    guard let date = info.mostImminentDate else { return false }
+    return date < Calendar.current.startOfDay(for: Date())
   }
 
-  private func isExpiringSoon(_ item: FoodItem) -> Bool {
-    guard !isExpired(item) else { return false }
+  private func isExpiringSoon(_ info: FoodItemInfo) -> Bool {
+    guard !isExpired(info), let date = info.mostImminentDate else { return false }
     let calendar = Calendar.current
     let today = calendar.startOfDay(for: Date())
     guard
@@ -181,13 +179,13 @@ struct CurrentItemsView: View {
     else {
       return false
     }
-    return item.expirationDate < oneWeekFromNow
+    return date < oneWeekFromNow
   }
 
-  private func dateColor(for item: FoodItem) -> Color {
-    if isExpired(item) {
+  private func dateColor(for info: FoodItemInfo) -> Color {
+    if isExpired(info) {
       return .red
-    } else if isExpiringSoon(item) {
+    } else if isExpiringSoon(info) {
       return .yellow
     } else {
       return .secondary

@@ -9,6 +9,7 @@ struct AddItemView: View {
   let initialItem: FoodItem?
 
   @State private var item: FoodItem
+  @State private var initialExpirationDate = Date()
   @State private var userDidSelectSymbol: Bool
   @State private var isGeneratingSymbol = false
   @State private var lastGeneratedName = ""
@@ -73,6 +74,7 @@ struct AddItemView: View {
               }
             }
         }
+        DatePicker("Expiration Date", selection: $initialExpirationDate, displayedComponents: .date)
       }
       .onAppear { loadFinishedNames() }
       .navigationTitle("New Item")
@@ -150,7 +152,7 @@ struct AddItemView: View {
     newItem.notes = item.notes.trimmingCharacters(in: .whitespacesAndNewlines)
     do {
       let id = try database.saveItem(&newItem)
-      // Auto-generate symbol if not manually selected and name not yet processed
+      try database.addExpirationDate(foodItemId: id, date: initialExpirationDate)
       if !userDidSelectSymbol && newItem.name != lastGeneratedName {
         let name = newItem.name
         Task {

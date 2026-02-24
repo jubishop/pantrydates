@@ -104,6 +104,26 @@ struct AppDatabase {
       )
     }
 
+    // Move expirationDate to separate table
+    migrator.registerMigration("v13") { db in
+      try db.create(table: "expirationDate") { t in
+        t.autoIncrementedPrimaryKey("id")
+        t.belongsTo("foodItem", onDelete: .cascade).notNull()
+        t.column("date", .datetime).notNull()
+      }
+
+      try db.execute(
+        sql: """
+          INSERT INTO expirationDate (foodItemId, date)
+          SELECT id, expirationDate FROM foodItem
+          """
+      )
+
+      try db.alter(table: "foodItem") { t in
+        t.drop(column: "expirationDate")
+      }
+    }
+
     return migrator
   }
 }
@@ -131,19 +151,21 @@ extension AppDatabase {
   }
 }
 
-// MARK: - Database Access
+// MARK: - Food Items
 
 extension AppDatabase {
-  func fetchAllItems() throws -> [FoodItem] {
-    try writer.read { db in
-      try FoodItem.order(Column("expirationDate").asc).fetchAll(db)
+  func observeAllItemInfos() -> AsyncValueObservation<[FoodItemInfo]> {
+    let observation = ValueObservation.tracking { db in
+      let request = FoodItem.including(all: FoodItem.expirationDates)
+      var infos = try FoodItemInfo.fetchAll(db, request)
+      infos.sort { a, b in
+        let aDate = a.mostImminentDate ?? .distantFuture
+        let bDate = b.mostImminentDate ?? .distantFuture
+        return aDate < bDate
+      }
+      return infos
     }
-  }
-
-  func fetchItem(id: Int64) throws -> FoodItem? {
-    try writer.read { db in
-      try FoodItem.fetchOne(db, key: id)
-    }
+    return observation.values(in: writer)
   }
 
   @discardableResult
@@ -178,13 +200,6 @@ extension AppDatabase {
     }
   }
 
-  func observeAllItems() -> AsyncValueObservation<[FoodItem]> {
-    let observation = ValueObservation.tracking { db in
-      try FoodItem.order(Column("expirationDate").asc).fetchAll(db)
-    }
-    return observation.values(in: writer)
-  }
-
   func updateSymbol(id: Int64, symbolName: String) throws {
     try writer.write { db in
       if var item = try FoodItem.fetchOne(db, key: id) {
@@ -194,18 +209,49 @@ extension AppDatabase {
     }
   }
 
-  func finishItem(_ item: FoodItem) throws {
+  func finishItemDate(_ info: FoodItemInfo) throws {
     try writer.write { db in
       var finished = FinishedItem(
-        name: item.name,
-        notes: item.notes,
+        name: info.foodItem.name,
+        notes: info.foodItem.notes,
         finishedDate: Date(),
-        flagged: item.flagged,
-        refrigerated: item.refrigerated,
-        symbolName: item.symbolName
+        flagged: info.foodItem.flagged,
+        refrigerated: info.foodItem.refrigerated,
+        symbolName: info.foodItem.symbolName
       )
       try finished.insert(db)
-      _ = try item.delete(db)
+
+      let sorted = info.sortedDates
+      if sorted.count <= 1 {
+        _ = try info.foodItem.delete(db)
+      } else if let mostImminent = sorted.first {
+        _ = try mostImminent.delete(db)
+      }
+    }
+  }
+}
+
+// MARK: - Expiration Dates
+
+extension AppDatabase {
+  @discardableResult
+  func addExpirationDate(foodItemId: Int64, date: Date) throws -> ExpirationDate {
+    try writer.write { db in
+      var expDate = ExpirationDate(foodItemId: foodItemId, date: date)
+      try expDate.insert(db)
+      return expDate
+    }
+  }
+
+  func updateExpirationDate(_ expirationDate: ExpirationDate) throws {
+    try writer.write { db in
+      try expirationDate.update(db)
+    }
+  }
+
+  func deleteExpirationDate(_ expirationDate: ExpirationDate) throws {
+    try writer.write { db in
+      _ = try expirationDate.delete(db)
     }
   }
 }

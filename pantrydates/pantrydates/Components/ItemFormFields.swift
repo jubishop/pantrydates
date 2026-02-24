@@ -14,7 +14,6 @@ struct ItemFormFields<NameField: View>: View {
   var body: some View {
     nameField()
     TextField("Notes", text: $item.notes)
-    DatePicker("Expiration Date", selection: $item.expirationDate, displayedComponents: .date)
     Toggle("Flagged", isOn: $item.flagged)
     Toggle("Refrigerated", isOn: $item.refrigerated)
   }

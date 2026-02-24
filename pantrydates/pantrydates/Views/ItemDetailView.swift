@@ -7,30 +7,57 @@ struct ItemDetailView: View {
 
   let database: AppDatabase
 
-  @State private var item: FoodItem
+  @State private var info: FoodItemInfo
   @State private var originalName: String
+  @State private var newDate = Date()
   @State private var showDeleteConfirmation = false
   @State private var isGeneratingSymbol = false
   @State private var userDidSelectSymbol = false
   @State private var wasDeleted = false
 
-  init(database: AppDatabase, item: FoodItem) {
+  init(database: AppDatabase, info: FoodItemInfo) {
     self.database = database
-    _item = State(initialValue: item)
-    _originalName = State(initialValue: item.name)
+    _info = State(initialValue: info)
+    _originalName = State(initialValue: info.foodItem.name)
   }
 
   var body: some View {
     Form {
       SymbolPicker(
-        symbolName: $item.symbolName,
+        symbolName: $info.foodItem.symbolName,
         userDidSelectSymbol: $userDidSelectSymbol,
-        itemName: item.name,
-        flagged: item.flagged,
+        itemName: info.foodItem.name,
+        flagged: info.foodItem.flagged,
         isGeneratingSymbol: isGeneratingSymbol,
         onSuggestSymbol: suggestSymbol
       )
-      ItemFormFields(item: $item)
+      ItemFormFields(item: $info.foodItem)
+
+      Section("Expiration Dates") {
+        ForEach(info.sortedDates) { expDate in
+          HStack {
+            Text(expDate.date, style: .date)
+            Spacer()
+            Button(role: .destructive) {
+              removeDate(expDate)
+            } label: {
+              Image(systemName: "minus.circle.fill")
+                .foregroundStyle(.red)
+            }
+            .buttonStyle(.borderless)
+          }
+        }
+        HStack {
+          DatePicker("New Date", selection: $newDate, displayedComponents: .date)
+          Button {
+            addDate()
+          } label: {
+            Image(systemName: "plus.circle.fill")
+              .foregroundStyle(.green)
+          }
+          .buttonStyle(.borderless)
+        }
+      }
     }
     .navigationTitle("Edit Item")
     .navigationBarTitleDisplayMode(.inline)
@@ -60,14 +87,37 @@ struct ItemDetailView: View {
     }
   }
 
+  private func addDate() {
+    guard let id = info.id else { return }
+    do {
+      let expDate = try database.addExpirationDate(foodItemId: id, date: newDate)
+      info.expirationDates.append(expDate)
+    } catch {
+      print("Failed to add date: \(error)")
+    }
+  }
+
+  private func removeDate(_ expDate: ExpirationDate) {
+    if info.expirationDates.count <= 1 {
+      showDeleteConfirmation = true
+      return
+    }
+    do {
+      try database.deleteExpirationDate(expDate)
+      info.expirationDates.removeAll { $0.id == expDate.id }
+    } catch {
+      print("Failed to remove date: \(error)")
+    }
+  }
+
   private func suggestSymbol() {
-    let name = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    let name = info.foodItem.name.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !name.isEmpty else { return }
 
     isGeneratingSymbol = true
     Task {
       if let symbol = await SymbolService.shared.suggestSymbol(for: name) {
-        item.symbolName = symbol
+        info.foodItem.symbolName = symbol
         userDidSelectSymbol = true
       }
       isGeneratingSymbol = false
@@ -77,18 +127,20 @@ struct ItemDetailView: View {
   private func saveChanges() {
     guard !wasDeleted else { return }
 
-    let trimmedName = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    let trimmedName = info.foodItem.name.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !trimmedName.isEmpty else { return }
 
     let nameChanged = trimmedName != originalName
 
-    var updatedItem = item
+    var updatedItem = info.foodItem
     updatedItem.name = trimmedName
-    updatedItem.notes = item.notes.trimmingCharacters(in: .whitespacesAndNewlines)
+    updatedItem.notes = info.foodItem.notes.trimmingCharacters(in: .whitespacesAndNewlines)
 
     do {
       let id = try database.saveItem(&updatedItem)
-      // Auto-generate new symbol if name changed and user didn't manually select one
+      for expDate in info.expirationDates {
+        try database.updateExpirationDate(expDate)
+      }
       if nameChanged && !userDidSelectSymbol {
         Task {
           if let symbol = await SymbolService.shared.suggestSymbol(for: trimmedName) {
@@ -102,7 +154,7 @@ struct ItemDetailView: View {
   }
 
   private func deleteItem() {
-    guard let id = item.id else { fatalError("Editing unsaved item?") }
+    guard let id = info.id else { fatalError("Editing unsaved item?") }
     do {
       try database.deleteItem(id: id)
       wasDeleted = true

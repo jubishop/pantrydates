@@ -107,11 +107,14 @@ struct ItemDetailView: View {
         return match.date
       },
       set: { newDate in
-        if let index = info.expirationDates.firstIndex(
-          where: { $0.id == expDate.id }
-        ) {
-          info.expirationDates[index].date = newDate
+        guard
+          let index = info.expirationDates.firstIndex(
+            where: { $0.id == expDate.id }
+          )
+        else {
+          fatalError("Expiration date not found in array")
         }
+        info.expirationDates[index].date = newDate
       }
     )
   }

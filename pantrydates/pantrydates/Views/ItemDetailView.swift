@@ -35,16 +35,21 @@ struct ItemDetailView: View {
 
       Section("Expiration Dates") {
         ForEach(info.sortedDates) { expDate in
-          HStack {
-            Text(expDate.date, style: .date)
-            Spacer()
+          DatePicker(
+            expDate.date.formatted(date: .abbreviated, time: .omitted),
+            selection: bindingForDate(expDate),
+            displayedComponents: .date
+          )
+          .foregroundStyle(dateColor(for: expDate.date))
+          .fontWeight(
+            isPastExpired(expDate.date) ? .bold : .regular
+          )
+          .swipeActions(edge: .trailing) {
             Button(role: .destructive) {
               removeDate(expDate)
             } label: {
-              Image(systemName: "minus.circle.fill")
-                .foregroundStyle(.red)
+              Image(systemName: "trash")
             }
-            .buttonStyle(.borderless)
           }
         }
         HStack {
@@ -85,6 +90,30 @@ struct ItemDetailView: View {
     .onDisappear {
       saveChanges()
     }
+  }
+
+  private func bindingForDate(
+    _ expDate: ExpirationDate
+  ) -> Binding<Date> {
+    Binding(
+      get: {
+        guard
+          let match = info.expirationDates.first(
+            where: { $0.id == expDate.id }
+          )
+        else {
+          fatalError("Expiration date not found in array")
+        }
+        return match.date
+      },
+      set: { newDate in
+        if let index = info.expirationDates.firstIndex(
+          where: { $0.id == expDate.id }
+        ) {
+          info.expirationDates[index].date = newDate
+        }
+      }
+    )
   }
 
   private func addDate() {

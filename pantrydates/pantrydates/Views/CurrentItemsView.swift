@@ -92,17 +92,19 @@ struct CurrentItemsView: View {
     }
   }
 
-  @ViewBuilder
   private func itemRow(_ info: FoodItemInfo) -> some View {
-    NavigationLink(value: info) {
+    guard let date = info.mostImminentDate else {
+      fatalError("Item has no expiration dates")
+    }
+    return NavigationLink(value: info) {
       FoodItemRow(
         symbolName: info.foodItem.symbolName,
         flagged: info.foodItem.flagged,
         name: info.foodItem.name,
         notes: info.foodItem.notes,
-        date: info.mostImminentDate ?? Date(),
-        dateColor: dateColor(for: info),
-        dateBold: isPastExpired(info)
+        date: date,
+        dateColor: dateColor(for: date),
+        dateBold: isPastExpired(date)
       )
     }
     .swipeActions(edge: .leading) {
@@ -156,39 +158,4 @@ struct CurrentItemsView: View {
     }
   }
 
-  private func isExpired(_ info: FoodItemInfo) -> Bool {
-    guard let date = info.mostImminentDate else { return false }
-    return isPastExpired(info) || Calendar.current.isDateInToday(date)
-  }
-
-  private func isPastExpired(_ info: FoodItemInfo) -> Bool {
-    guard let date = info.mostImminentDate else { return false }
-    return date < Calendar.current.startOfDay(for: Date())
-  }
-
-  private func isExpiringSoon(_ info: FoodItemInfo) -> Bool {
-    guard !isExpired(info), let date = info.mostImminentDate else { return false }
-    let calendar = Calendar.current
-    let today = calendar.startOfDay(for: Date())
-    guard
-      let oneWeekFromNow = calendar.date(
-        byAdding: .day,
-        value: 7,
-        to: today
-      )
-    else {
-      return false
-    }
-    return date < oneWeekFromNow
-  }
-
-  private func dateColor(for info: FoodItemInfo) -> Color {
-    if isExpired(info) {
-      return .red
-    } else if isExpiringSoon(info) {
-      return .yellow
-    } else {
-      return .secondary
-    }
-  }
 }

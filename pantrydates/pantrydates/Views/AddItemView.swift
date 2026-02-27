@@ -50,7 +50,11 @@ struct AddItemView: View {
         ItemFormFields(item: $item) {
           TextField("Item Name", text: $item.name)
             .focused($isNameFocused)
-            .onAppear { isNameFocused = true }
+            .onAppear {
+              if item.name.isEmpty {
+                isNameFocused = true
+              }
+            }
             .onChange(of: isNameFocused) { _, focused in
               if !focused { handleNameFocusLost() }
             }

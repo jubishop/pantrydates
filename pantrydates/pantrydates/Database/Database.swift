@@ -179,6 +179,27 @@ extension AppDatabase {
     return id
   }
 
+  @discardableResult
+  func saveNewItem(
+    _ item: inout FoodItem,
+    expirationDate: Date
+  ) throws -> Int64 {
+    try writer.write { db in
+      try item.save(db)
+      guard let id = item.id else {
+        fatalError(
+          "ID should always be set after successful save"
+        )
+      }
+      var expDate = ExpirationDate(
+        foodItemId: id,
+        date: expirationDate
+      )
+      try expDate.insert(db)
+      return id
+    }
+  }
+
   func deleteItem(_ item: FoodItem) throws {
     try writer.write { db in
       _ = try item.delete(db)

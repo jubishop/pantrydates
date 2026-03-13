@@ -155,8 +155,10 @@ struct AddItemView: View {
     newItem.name = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
     newItem.notes = item.notes.trimmingCharacters(in: .whitespacesAndNewlines)
     do {
-      let id = try database.saveItem(&newItem)
-      try database.addExpirationDate(foodItemId: id, date: initialExpirationDate)
+      let id = try database.saveNewItem(
+        &newItem,
+        expirationDate: initialExpirationDate
+      )
       if !userDidSelectSymbol && newItem.name != lastGeneratedName {
         let name = newItem.name
         Task {

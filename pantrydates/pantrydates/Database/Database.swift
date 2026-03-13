@@ -182,7 +182,7 @@ extension AppDatabase {
   @discardableResult
   func saveNewItem(
     _ item: inout FoodItem,
-    expirationDate: Date
+    expirationDates: [Date]
   ) throws -> Int64 {
     try writer.write { db in
       try item.save(db)
@@ -191,11 +191,13 @@ extension AppDatabase {
           "ID should always be set after successful save"
         )
       }
-      var expDate = ExpirationDate(
-        foodItemId: id,
-        date: expirationDate
-      )
-      try expDate.insert(db)
+      for date in expirationDates {
+        var expDate = ExpirationDate(
+          foodItemId: id,
+          date: date
+        )
+        try expDate.insert(db)
+      }
       return id
     }
   }

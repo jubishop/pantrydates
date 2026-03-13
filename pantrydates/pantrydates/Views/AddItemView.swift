@@ -9,7 +9,8 @@ struct AddItemView: View {
   let initialItem: FoodItem?
 
   @State private var item: FoodItem
-  @State private var initialExpirationDate = Date()
+  @State private var expirationDates: [Date] = [Date()]
+  @State private var newDate = Date()
   @State private var userDidSelectSymbol: Bool
   @State private var isGeneratingSymbol = false
   @State private var lastGeneratedName = ""
@@ -78,7 +79,42 @@ struct AddItemView: View {
               }
             }
         }
-        DatePicker("Expiration Date", selection: $initialExpirationDate, displayedComponents: .date)
+        Section("Expiration Dates") {
+          ForEach(Array(expirationDates.enumerated()), id: \.offset) { index, _ in
+            DatePicker(
+              expirationDates[index]
+                .formatted(
+                  date: .abbreviated,
+                  time: .omitted
+                ),
+              selection: $expirationDates[index],
+              displayedComponents: .date
+            )
+            .swipeActions(edge: .trailing) {
+              if expirationDates.count > 1 {
+                Button(role: .destructive) {
+                  expirationDates.remove(at: index)
+                } label: {
+                  Image(systemName: "trash")
+                }
+              }
+            }
+          }
+          HStack {
+            DatePicker(
+              "New Date",
+              selection: $newDate,
+              displayedComponents: .date
+            )
+            Button {
+              expirationDates.append(newDate)
+            } label: {
+              Image(systemName: "plus.circle.fill")
+                .foregroundStyle(.green)
+            }
+            .buttonStyle(.borderless)
+          }
+        }
       }
       .onAppear { loadFinishedNames() }
       .navigationTitle("New Item")
@@ -157,7 +193,7 @@ struct AddItemView: View {
     do {
       let id = try database.saveNewItem(
         &newItem,
-        expirationDate: initialExpirationDate
+        expirationDates: expirationDates
       )
       if !userDidSelectSymbol && newItem.name != lastGeneratedName {
         let name = newItem.name

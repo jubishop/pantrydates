@@ -12,15 +12,15 @@ enum FoodIcon: String, CaseIterable {
   case barrel
   case bean
   case beef
-  case beer
   case bottleWine = "bottle-wine"
+  case bowl
   case cake
   case cakeSlice = "cake-slice"
   case candy
-  case candyCane = "candy-cane"
   case carrot
   case chefHat = "chef-hat"
   case cherry
+  case chocolate
   case citrus
   case coffee
   case cookie
@@ -32,21 +32,23 @@ enum FoodIcon: String, CaseIterable {
   case drumstick
   case egg
   case eggFried = "egg-fried"
+  case energyBar = "energy-bar"
   case fish
   case glassWater = "glass-water"
   case grape
   case ham
   case hamburger
   case handPlatter = "hand-platter"
-  case hop
   case iceCreamBowl = "ice-cream-bowl"
   case iceCreamCone = "ice-cream-cone"
+  case jar
   case leafyGreen = "leafy-green"
   case lollipop
   case martini
   case microwave
   case milk
   case nut
+  case pineapple
   case pizza
   case popcorn
   case popsicle
@@ -54,7 +56,6 @@ enum FoodIcon: String, CaseIterable {
   case salad
   case sandwich
   case shell
-  case snail
   case soup
   case torus
   case utensils
@@ -127,9 +128,14 @@ actor SymbolService {
 
     Glossary:
     - amphora = cheese, yogurt, fermented dairy
+    - bowl = cereal, oatmeal, granola, grain bowls
+    - chocolate = chocolate bars, cocoa, chocolate items
+    - energy-bar = protein bars, energy bars, snack bars
+    - jar = honey, jam, nut butter, preserves
+    - pineapple = pineapple, tropical fruits
     - torus = bagels, donuts, ring-shaped foods
     - hand-platter = condiments, sauces, dips
-    - barrel = spices, seasonings
+    - barrel = spices, seasonings, dry powders
     - utensils = unknown or generic food
     - utensils-crossed = shared meal, general cooking
     - chef-hat = prepared dish, chef-made meal
@@ -138,17 +144,20 @@ actor SymbolService {
     - refrigerator = refrigerated or chilled item
     - cup-soda = soda, juice, soft drink
     - glass-water = water or plain beverage
-    - hop = beer or hoppy drink
     - drumstick = poultry
     - leafy-green = leafy vegetables
     - shell = shellfish
-    - snail = escargot
 
     Examples:
     Food: Greek yogurt -> icon: amphora
     Food: Everything bagel -> icon: torus
     Food: BBQ sauce -> icon: hand-platter
     Food: Taco seasoning -> icon: barrel
+    Food: Cheerios -> icon: bowl
+    Food: Dark chocolate -> icon: chocolate
+    Food: Clif Bar -> icon: energy-bar
+    Food: Strawberry jam -> icon: jar
+    Food: Canned pineapple -> icon: pineapple
     """
   }
 }

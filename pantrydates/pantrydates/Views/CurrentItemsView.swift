@@ -3,6 +3,10 @@
 import GRDB
 import SwiftUI
 
+extension URL: @retroactive Identifiable {
+  public var id: String { absoluteString }
+}
+
 struct CurrentItemsView: View {
   let database: AppDatabase
 
@@ -10,6 +14,7 @@ struct CurrentItemsView: View {
   @State private var showingAddSheet = false
   @State private var showFlaggedOnly = false
   @State private var filterText = ""
+  @State private var exportedFileURL: URL?
 
   private var pantryInfos: [FoodItemInfo] {
     filteredInfos(refrigerated: false)
@@ -85,9 +90,24 @@ struct CurrentItemsView: View {
             Image(systemName: "plus")
           }
         }
+        if database.databaseURL != nil {
+          ToolbarItem(placement: .secondaryAction) {
+            Button {
+              exportDatabase()
+            } label: {
+              Label(
+                "Export Database",
+                systemImage: "square.and.arrow.up"
+              )
+            }
+          }
+        }
       }
       .sheet(isPresented: $showingAddSheet) {
         AddItemView(database: database)
+      }
+      .sheet(item: $exportedFileURL) { url in
+        ActivityView(activityItems: [url])
       }
     }
   }
@@ -146,6 +166,24 @@ struct CurrentItemsView: View {
       try database.deleteItem(item)
     } catch {
       print("Failed to delete item: \(error)")
+    }
+  }
+
+  private func exportDatabase() {
+    guard let sourceURL = database.databaseURL else { return }
+    let tempDir = FileManager.default.temporaryDirectory
+    let destURL = tempDir.appendingPathComponent(
+      "pantrydates.sqlite"
+    )
+    try? FileManager.default.removeItem(at: destURL)
+    do {
+      try FileManager.default.copyItem(
+        at: sourceURL,
+        to: destURL
+      )
+      exportedFileURL = destURL
+    } catch {
+      print("Failed to export database: \(error)")
     }
   }
 

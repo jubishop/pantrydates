@@ -5,9 +5,11 @@ import GRDB
 
 struct AppDatabase {
   let writer: DatabaseWriter
+  let databaseURL: URL?
 
-  init(_ writer: DatabaseWriter) throws {
+  init(_ writer: DatabaseWriter, url: URL? = nil) throws {
     self.writer = writer
+    self.databaseURL = url
     try migrator.migrate(writer)
   }
 
@@ -137,12 +139,18 @@ extension AppDatabase {
       appropriateFor: nil,
       create: true
     )
-    let directoryURL = appSupportURL.appendingPathComponent("Database", isDirectory: true)
-    try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+    let directoryURL = appSupportURL.appendingPathComponent(
+      "Database",
+      isDirectory: true
+    )
+    try fileManager.createDirectory(
+      at: directoryURL,
+      withIntermediateDirectories: true
+    )
 
     let databaseURL = directoryURL.appendingPathComponent("db.sqlite")
     let writer = try DatabaseQueue(path: databaseURL.path)
-    return try AppDatabase(writer)
+    return try AppDatabase(writer, url: databaseURL)
   }
 
   static func makeEmpty() throws -> AppDatabase {

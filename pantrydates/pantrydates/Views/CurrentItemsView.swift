@@ -72,7 +72,7 @@ struct CurrentItemsView: View {
         ItemDetailView(database: database, info: info)
       }
       .toolbar {
-        ToolbarItem(placement: .cancellationAction) {
+        ToolbarItem(placement: .topBarLeading) {
           Button {
             showFlaggedOnly.toggle()
           } label: {
@@ -91,14 +91,11 @@ struct CurrentItemsView: View {
           }
         }
         if database.databaseURL != nil {
-          ToolbarItem(placement: .secondaryAction) {
+          ToolbarItem(placement: .topBarLeading) {
             Button {
               exportDatabase()
             } label: {
-              Label(
-                "Export Database",
-                systemImage: "square.and.arrow.up"
-              )
+              Image(systemName: "square.and.arrow.up")
             }
           }
         }

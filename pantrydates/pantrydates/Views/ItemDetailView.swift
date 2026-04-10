@@ -45,6 +45,12 @@ struct ItemDetailView: View {
             isPastExpired(expDate.date) ? .bold : .regular
           )
           .swipeActions(edge: .trailing) {
+            Button {
+              finishDate(expDate)
+            } label: {
+              Image(systemName: "checkmark.circle")
+            }
+            .tint(.green)
             Button(role: .destructive) {
               removeDate(expDate)
             } label: {
@@ -126,6 +132,25 @@ struct ItemDetailView: View {
       info.expirationDates.append(expDate)
     } catch {
       print("Failed to add date: \(error)")
+    }
+  }
+
+  private func finishDate(_ expDate: ExpirationDate) {
+    do {
+      try database.finishItemDate(
+        info,
+        expirationDate: expDate
+      )
+      if info.expirationDates.count <= 1 {
+        wasDeleted = true
+        dismiss()
+      } else {
+        info.expirationDates.removeAll {
+          $0.id == expDate.id
+        }
+      }
+    } catch {
+      print("Failed to finish date: \(error)")
     }
   }
 

@@ -241,6 +241,16 @@ extension AppDatabase {
   }
 
   func finishItemDate(_ info: FoodItemInfo) throws {
+    try finishItemDate(
+      info,
+      expirationDate: info.sortedDates.first
+    )
+  }
+
+  func finishItemDate(
+    _ info: FoodItemInfo,
+    expirationDate: ExpirationDate?
+  ) throws {
     try writer.write { db in
       var finished = FinishedItem(
         name: info.foodItem.name,
@@ -252,11 +262,10 @@ extension AppDatabase {
       )
       try finished.insert(db)
 
-      let sorted = info.sortedDates
-      if sorted.count <= 1 {
+      if info.expirationDates.count <= 1 {
         _ = try info.foodItem.delete(db)
-      } else if let mostImminent = sorted.first {
-        _ = try mostImminent.delete(db)
+      } else if let target = expirationDate {
+        _ = try target.delete(db)
       }
     }
   }

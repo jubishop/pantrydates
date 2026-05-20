@@ -10,5 +10,15 @@ DerivedData/
 .build/
 .swiftpm/
 
+# Local app data exports
+app_support/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3
+
+# Local agent settings
+.claude/settings.local.json
+
 # macOS
 .DS_Store

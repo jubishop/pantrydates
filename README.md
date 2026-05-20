@@ -27,3 +27,8 @@ A simple iOS app to track pantry items and their expiration dates.
 
 - iOS 26.2+
 - Xcode 26.3+
+
+## Support and Privacy
+
+- Support: https://github.com/jubishop/pantrydates/issues
+- Privacy Policy: https://github.com/jubishop/pantrydates/blob/main/PRIVACY.md

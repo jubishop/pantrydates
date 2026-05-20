@@ -46,17 +46,48 @@ Signing available locally:
 - Export re-signed with Apple Distribution for Justin Bishop.
 - Export used the App Store profile for `com.artisanalsoftware.pantrydates`.
 
+## App Store Connect State
+
+The following App Store Connect fields were set through the API during release
+prep:
+
+- App name: `Pantry Dates`
+- Subtitle: `Track pantry expirations`
+- Primary category: `FOOD_AND_DRINK`
+- Content rights: `DOES_NOT_USE_THIRD_PARTY_CONTENT`
+- Age rating: `FOUR_PLUS`
+- Version description, keywords, and support URL for the `en-US` localization.
+- Privacy policy URL for the `en-US` App Info localization.
+- Free app price schedule with base territory `USA`.
+
+Verification after the API writes showed:
+
+- 6.5-inch iPhone screenshot set `APP_IPHONE_65`, 1 screenshot, state
+  `COMPLETE`.
+- 13-inch iPad screenshot set `APP_IPAD_PRO_3GEN_129`, 1 screenshot, state
+  `COMPLETE`.
+- Price schedule readable at `/v1/apps/6758566877/appPriceSchedule`, with free
+  current prices.
+
 ## Screenshots
 
 Generated release screenshots live in `/tmp/pantrydates-appstore-screenshots/`.
+The RGB/no-alpha copies uploaded to App Store Connect were staged under
+`/tmp/pantrydates-deliver/screenshots/en-US/`.
 
 - `iphone-6.5.png`: 1284x2778 PNG for the 6.5-inch iPhone slot.
 - `ipad-13.png`: 2064x2752 PNG for the 13-inch iPad slot.
 
-Both screenshots were created from seeded simulator data. They currently report
-alpha channels; strip alpha before final App Store upload if Apple rejects them.
+## Remaining Manual Step
 
-## App Store Connect Requirements Seen
+App Privacy data-usage details could not be written with the App Store Connect
+API key. Fastlane's App Privacy action uses private App Store Connect web APIs
+that are not available through the official API key path.
+
+For this app, select that the app does not collect data. The repo privacy policy
+is already public at `https://github.com/jubishop/pantrydates/blob/main/PRIVACY.md`.
+
+## Original App Store Connect Requirements Seen
 
 Required items App Store Connect reported during release prep:
 

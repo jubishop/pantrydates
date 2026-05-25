@@ -23,9 +23,9 @@ Check memory before guessing about prior project-specific decisions or release d
 
 Detailed release memory lives in `memory/reference_app_store_release.md`.
 
-The local App Store Connect API key is outside the repo. Use
-`~/.config/pantrydates/appstore-connect.env`; the private key is under
-`~/.appstoreconnect/private_keys/`. Do not print or commit the `.p8` contents.
+The local App Store Connect API env vars live in `~/.env`; the private key is
+under `~/.appstoreconnect/private_keys/`. Do not print or commit the `.p8`
+contents.
 
 ## Database
 

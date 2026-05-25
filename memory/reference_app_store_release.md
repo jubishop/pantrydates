@@ -14,13 +14,14 @@
 
 The App Store Connect API key is stored outside the repo:
 
-- Env file: `~/.config/pantrydates/appstore-connect.env`
+- Env file: `~/.env`
 - Private key: `~/.appstoreconnect/private_keys/AuthKey_A9CMX47R79.p8`
 - Key ID: `A9CMX47R79`
 - Issuer ID: `9e67e4e3-0208-4437-a158-b218c77edea5`
 
-The env file exports `ASC_KEY_ID`, `ASC_ISSUER_ID`, and `ASC_KEY_PATH`. Do not
-print or commit the `.p8` contents.
+The env file exports `ASC_KEY_ID`, `ASC_ISSUER_ID`, and `ASC_KEY_PATH` so
+PodHaven and PantryDates can share them. Do not print or commit the `.p8`
+contents.
 
 Read-only API verification succeeded with:
 

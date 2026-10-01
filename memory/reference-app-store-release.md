@@ -1,3 +1,9 @@
+---
+name: "reference-app-store-release"
+description: "App Store Release: project context and operating guidance."
+type: "reference"
+---
+
 # App Store Release
 
 ## Identifiers

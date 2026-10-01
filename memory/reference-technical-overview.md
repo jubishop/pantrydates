@@ -1,3 +1,9 @@
+---
+name: "reference-technical-overview"
+description: "Technical Overview: project context and operating guidance."
+type: "reference"
+---
+
 # Technical Overview
 
 Pantry Dates is a SwiftUI iOS 26.2+ app backed by GRDB/SQLite. The Xcode project

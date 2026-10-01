@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+"""Run application validation explicitly, after the foundation checks."""
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+os.chdir(ROOT)
+ENV = {key: value for key, value in os.environ.items()
+       if not key.startswith("GIT_") and key not in {"PYTHONPATH", "PYTHONHOME"}}
+ENV["PYTHONDONTWRITEBYTECODE"] = "1"
+
+def run(*command, capture=False):
+    result = subprocess.run(command, cwd=ROOT, env=ENV, text=True,
+                            capture_output=capture, check=True)
+    return result.stdout.strip() if capture else ""
+
+
+
+def xcode_runtime(minimum):
+    version = run("xcodebuild", "-version", capture=True)
+    match = re.search(r"Xcode (\d+)\.(\d+)", version)
+    if not match or tuple(map(int, match.groups())) < minimum:
+        raise RuntimeError(f"{version} is unsupported; select Xcode {minimum[0]}.{minimum[1]} or later with xcode-select.")
+
+def main():
+    xcode_runtime((26, 3))
+    run("xcodebuild", "-project", "pantrydates/pantrydates.xcodeproj", "-scheme", "pantrydates",
+        "-destination", "generic/platform=iOS Simulator",
+        "-derivedDataPath", str(ROOT / ".cache/xcode/DerivedData"),
+        "-clonedSourcePackagesDirPath", str(ROOT / ".cache/xcode/SourcePackages"),
+        "CODE_SIGNING_ALLOWED=NO", "build")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, RuntimeError, ValueError, subprocess.CalledProcessError) as error:
+        print(error, file=sys.stderr)
+        sys.exit(1)

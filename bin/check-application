@@ -27,6 +27,7 @@ def xcode_runtime(minimum):
 
 def main():
     xcode_runtime((26, 3))
+    run(sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py", "-v")
     run("xcodebuild", "-project", "pantrydates/pantrydates.xcodeproj", "-scheme", "pantrydates",
         "-destination", "generic/platform=iOS Simulator",
         "-derivedDataPath", str(ROOT / ".cache/xcode/DerivedData"),

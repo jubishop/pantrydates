@@ -21,22 +21,11 @@ app_support/
 .claude/settings.local.json
 
 # macOS
-.DS_Store
-
 
 # td
-.todos/
 
 # Local project foundation state
-.cache/
-.config/qmd/
-.env
-.env.*
-!.env.example
-.envrc.local
-__pycache__/
-*.py[cod]
-worktrees/
+
 # project-starter:begin
 .DS_Store
 .cache/

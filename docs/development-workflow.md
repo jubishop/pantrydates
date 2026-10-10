@@ -41,7 +41,7 @@ Application validation requires macOS and Xcode 26.3 or later, matching the
 README; `bin/check-application` stops before any check on an older Xcode. The
 app targets iOS 26.2 or later, set by `IPHONEOS_DEPLOYMENT_TARGET` in the
 Xcode project. CI installs the latest stable Python and selects the newest
-stable Xcode on its `macos-26` runner. Follow the
+stable Xcode on its `macos-latest` runner. Follow the
 [version policy](foundation/engineering-policy.md#runtime-and-toolchain-versions).
 
 ## Deployment

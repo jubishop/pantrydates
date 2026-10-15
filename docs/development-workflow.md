@@ -33,7 +33,10 @@ target and package resolution.
 
 GitHub validation is defined in [the workflow](../.github/workflows/check.yml).
 Full CI success must be checked for the delivered revision; a local pass does
-not establish a remote result.
+not establish a remote result. On 2026-10-14 the owner reverted this project's
+local-check fallback for Actions quota or rate limits (td-efe84d). That project
+rule takes precedence over the foundation's Hosted CI exception; the reason was
+not recorded.
 
 ## Runtime and toolchain versions
 

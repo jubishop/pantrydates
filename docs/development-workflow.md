@@ -16,8 +16,7 @@ bin/check --full
 ```
 
 Setup needs Git and Python 3.9 or later, and checks also need ShellCheck.
-QMD and direnv are optional; setup reports skipped features. Install td and
-run `td init` as described in [task tracking](foundation/task-tracking.md).
+QMD and direnv are optional; setup reports skipped features.
 Create `.envrc` only when the project needs environment settings, and review
 it before running `direnv allow`; search does not need it.
 
@@ -34,7 +33,7 @@ target and package resolution.
 GitHub validation is defined in [the workflow](../.github/workflows/check.yml).
 Full CI success must be checked for the delivered revision; a local pass does
 not establish a remote result. On 2026-10-14 the owner reverted this project's
-local-check fallback for Actions quota or rate limits (td-efe84d). That project
+local-check fallback for Actions quota or rate limits. That project
 rule takes precedence over the foundation's Hosted CI exception; the reason was
 not recorded.
 

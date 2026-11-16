@@ -35,9 +35,9 @@ A simple iOS app to track pantry items and their expiration dates.
 
 ## Project maintenance
 
-Run `bin/setup` to prepare local knowledge search and Git hooks. It requires
-Git and Python 3.9 or later; QMD and direnv are optional. Install ShellCheck
-for checks.
+Run `bin/setup` to prepare local knowledge search and Git hooks. It needs
+Git, Python 3, and QMD, plus direnv when the project has an `.envrc`. Install
+ShellCheck for checks.
 
 Use `bin/check --documents-only` for Markdown changes, `bin/check` for
 foundation static checks, and `bin/check --full` to add the application checks

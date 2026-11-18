@@ -31,49 +31,26 @@ take precedence over this block and the foundation pages wherever they differ.
 
 ## Project
 
-Pantry Dates is a SwiftUI iOS 26.2+ app backed by GRDB/SQLite.
-
-Open/build `pantrydates/pantrydates.xcodeproj`. The app target and scheme are both
-`pantrydates`.
-
-App Store identifiers:
-- Bundle ID: `com.artisanalsoftware.pantrydates`
-- App Store app ID: `6758566877`
-
-## App Store Connect
-
-Detailed release memory lives in `memory/reference-app-store-release.md`.
-
-The local App Store Connect API env vars live in `~/.env`; the private key is
-under `~/.appstoreconnect/private_keys/`. Do not print or commit the `.p8`
-contents.
+Pantry Dates is a SwiftUI iOS 26.2+ app backed by GRDB/SQLite. Its Xcode project
+is `pantrydates/pantrydates.xcodeproj`, with app target and scheme `pantrydates`
+and bundle ID `com.artisanalsoftware.pantrydates`. App Store release and App
+Store Connect API details are in
+[App Store release](memory/reference-app-store-release.md).
 
 ## Database
 
-Migrations live in `pantrydates/pantrydates/Database/Database.swift` under
-`migrator`. Add migrations sequentially. In DEBUG builds,
-`eraseDatabaseOnSchemaChange = true` resets the database on schema changes.
-
-Current latest migration: `v13`, which moved expiration dates from `foodItem` into
-separate `expirationDate` rows.
-
-For new persisted fields, add the model property, add a migration, then update the
-relevant add/edit/display views.
-
-## Local Data
-
-- App database: Application Support under `Database/db.sqlite`.
-- In-app export writes a temporary `pantrydates.sqlite`.
-- Do not commit SQLite exports or copied app data.
+Add migrations sequentially to `migrator` in
+`pantrydates/pantrydates/Database/Database.swift`. DEBUG builds set
+`eraseDatabaseOnSchemaChange`, so they reset the database on schema changes. For a
+new persisted field, add the model property and a migration, then update the views
+that add, edit, and display it.
 
 ## Code Style
 
-- Keep lines under 100 characters.
-- Put each SwiftUI view in its own file under `Views/`.
-- Put reusable UI in `Components/`.
-- Put shared structs/classes/enums in their own files.
-- After Swift edits, run `swift-format -i` on the modified Swift files.
-
-Use `fatalError()` for impossible states and invariant violations. Do not force
-unwrap optionals with `!`; use `guard let`, `if let`, or `??`. Do not use optional
-`.map` just to unwrap.
+- Keep lines under 100 characters, and run `xcrun swift-format -i` on the Swift
+  files you modify.
+- Put each SwiftUI view in its own file under `Views/`, reusable UI in
+  `Components/`, and each shared struct, class, or enum in its own file.
+- Use `fatalError()` for impossible states and invariant violations.
+- Never force unwrap optionals with `!`; use `guard let`, `if let`, or `??`. Don't
+  use optional `.map` just to unwrap.

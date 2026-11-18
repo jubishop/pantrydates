@@ -42,8 +42,7 @@ Apple returned app ID `6758566877`, name `pantrydates`, and the expected bundle 
 Local release readiness checks completed successfully:
 
 - Release build with code signing disabled.
-- Archive to `/tmp/pantrydates-release-audit.xcarchive`.
-- App Store Connect export to `/tmp/pantrydates-export/pantrydates.ipa`.
+- Archive and App Store Connect export (the `/tmp` outputs are gone).
 - App icon is a 1024x1024 PNG with RGB and no alpha.
 - `Info.plist` has `ITSAppUsesNonExemptEncryption=false`.
 
@@ -78,12 +77,11 @@ Verification after the API writes showed:
 
 ## Screenshots
 
-Generated release screenshots live in `/tmp/pantrydates-appstore-screenshots/`.
-The RGB/no-alpha copies uploaded to App Store Connect were staged under
-`/tmp/pantrydates-deliver/screenshots/en-US/`.
+The release screenshots were generated in `/tmp`, which no longer holds them.
+Regenerate RGB/no-alpha PNGs at these sizes:
 
-- `iphone-6.5.png`: 1284x2778 PNG for the 6.5-inch iPhone slot.
-- `ipad-13.png`: 2064x2752 PNG for the 13-inch iPad slot.
+- 1284x2778 for the 6.5-inch iPhone slot.
+- 2064x2752 for the 13-inch iPad slot.
 
 ## Remaining Manual Step
 

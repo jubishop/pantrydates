@@ -57,7 +57,5 @@ review records or convert them into ordinary memory pages.
 
 ## Active pages
 
-- [Technical overview](reference-technical-overview.md) — architecture, persistence,
-  icon suggestions, local data, and code layout.
 - [App Store release](reference-app-store-release.md) — App Store Connect API key
   locations, app IDs, release audit state, and screenshot outputs.

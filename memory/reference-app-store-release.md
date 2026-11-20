@@ -91,17 +91,3 @@ that are not available through the official API key path.
 
 For this app, select that the app does not collect data. The repo privacy policy
 is already public at `https://github.com/jubishop/pantrydates/blob/main/PRIVACY.md`.
-
-## Original App Store Connect Requirements Seen
-
-Required items App Store Connect reported during release prep:
-
-- 13-inch iPad screenshot.
-- 6.5-inch iPhone screenshot.
-- Privacy Policy URL in App Privacy.
-- Content Rights Information in App Information.
-- Required age-rating questions.
-- Primary category.
-- Free price tier.
-
-The version page also showed missing description, keywords, and support URL.
